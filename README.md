@@ -17,25 +17,27 @@ callback_plugins = majeinfo/resource_cleaner/plugins/callback
 
 [resource_cleaner]
 playbook_output_path = ./rollback
-hide_sensitive_data = false
 log_level = debug
+
+; possible values for the rollback playbook suffixes are:
+; date: (default) suffix with the current date (format .YYYY-MM-DD-hh-mm-ss)
+; rollback: sufix is .rollback
+rollback_playbook_suffix = date
+
 ```
 
 Now, if you run a Playbook, a rollback Playbook will be created
-under the ./rollback directory. This rollback Playbook can then be
+under the `./rollback` directory. This rollback Playbook can then be
 played to delete the resources previously created.
 
-LIMITS AND BUGS:
+## LIMITS AND BUGS:
 
-- amazon.aws.ec2_vpc_nat_gateway: 
+- `amazon.aws.ec2_vpc_nat_gateway`: 
   when creating a NAT Gateway with a dynamically created EIP, the EIP is not deleted on rollback
 
-- amazon.aws.s3_object:
-  when creating a directory in a S3 bucket, it is not deleted when using "mode: delobj" on rollback
+## SUPPORTED MODULES:
 
-SUPPORTED MODULES:
-
-For AWS:
+### For AWS:
 
 | Module | Supported |
 | :--- |:----------|
@@ -104,4 +106,10 @@ For AWS:
 | ```amazon.aws.route53_zone``` | ```No```  |
 | ```amazon.aws.s3_bucket``` | ```Yes``` |
 | ```amazon.aws.s3_object``` | ```Yes``` |
+
+### For GCP:
+
+| Module | Supported |
+| :--- |:----------|
+| ```google.cloud.gcp_remote_disk``` | ```Yes``` |
 
