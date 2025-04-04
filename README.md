@@ -23,7 +23,6 @@ log_level = debug
 ; date: (default) suffix with the current date (format .YYYY-MM-DD-hh-mm-ss)
 ; rollback: sufix is .rollback
 rollback_playbook_suffix = date
-
 ```
 
 Now, if you run a Playbook, a rollback Playbook will be created
@@ -111,5 +110,5 @@ played to delete the resources previously created.
 
 | Module | Supported |
 | :--- |:----------|
-| ```google.cloud.gcp_remote_disk``` | ```Yes``` |
+| ```google.cloud.gcp_compute_disk``` | ```Yes``` |
 
