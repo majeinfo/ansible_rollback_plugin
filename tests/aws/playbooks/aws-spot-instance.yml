@@ -1,0 +1,18 @@
+- name: Test Spot Instance creation
+  hosts: localhost
+  connection: local
+  gather_facts: False
+  vars_files:
+    - vars.yml
+
+  tasks:
+    - name: Create a Spot Instance
+      amazon.aws.ec2_spot_instance:
+        count: 0
+        launch_specification:
+          image_id: "{{ spot_instance_ami_id }}"
+          instance_type: t3.nano
+        state: present
+        region: "{{ region }}"
+
+

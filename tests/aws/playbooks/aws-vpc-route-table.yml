@@ -1,0 +1,24 @@
+- name: Test a VPC Route Table creation
+  hosts: localhost
+  connection: local
+  gather_facts: False
+  vars_files:
+    - vars.yml
+
+  tasks:
+    - name: Create a VPC
+      amazon.aws.ec2_vpc_net:
+        name: rollback_vpc
+        cidr_block: "10.10.0.0/16"
+        region: "{{ region }}"
+      register: vpc
+
+    - name: Create a VPC Route Table
+      amazon.aws.ec2_vpc_route_table:
+        vpc_id: "{{ vpc.vpc.id }}"
+        gateway_id: None
+        region: "{{ region }}"
+        tags:
+          Name: rollback-route-table
+
+

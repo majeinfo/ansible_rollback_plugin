@@ -1,0 +1,17 @@
+- name: Test Launch Template creation
+  hosts: localhost
+  connection: local
+  gather_facts: False
+  vars_files:
+    - vars.yml
+
+  tasks:
+    - name: Create a Launch Template
+      amazon.aws.ec2_launch_template:
+        template_name: rollback_launch_tpl
+        instance_type: "t3.nano"
+        image_id: "{{ launch_template_ami_id }}"
+        state: present
+        region: "{{ region }}"
+
+

@@ -1,0 +1,48 @@
+- name: Test Autoscaling Group creation
+  hosts: localhost
+  connection: local
+  gather_facts: False
+  vars_files:
+    - vars.yml
+
+  tasks:
+    - name: Create an ELB
+      amazon.aws.elb_classic_lb:
+        name: rollback-elb
+        zones:
+          - "{{ region }}a"
+          - "{{ region }}b"
+        listeners: 
+          - protocol: http
+            load_balancer_port: 80
+            instance_port: 80
+        state: present
+        region: "{{ region }}"
+
+    - name: Create a Launch Template
+      amazon.aws.ec2_launch_template:
+        template_name: rollback_launch_tpl
+        instance_type: "t3.nano"
+        image_id: "{{ launch_template_ami_id }}"
+        region: "{{ region }}"
+
+    - name: Create an autoscaling group using launch template
+      amazon.aws.autoscaling_group:
+        name: rollback-asg
+        load_balancers: 
+          - rollback-elb
+        availability_zones:
+          - "{{ region }}a"
+          - "{{ region }}b"
+        launch_template:
+          launch_template_name: rollback_launch_tpl
+          version: '1'
+        min_size: 0
+        max_size: 0
+        desired_capacity: 0
+        #vpc_zone_identifier: 
+        #  - subnet-abcd1234
+        #  - subnet-1a2b3c4d
+        region: "{{ region }}"
+
+

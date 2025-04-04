@@ -1,0 +1,76 @@
+- name: Create multiple compute resources
+  hosts: localhost
+  connection: local
+  gather_facts: False
+  vars_files:
+    - vars.yml
+
+  tasks:
+#    - name: Create a project
+#      google.cloud.gcp_resourcemanager_project:
+#        name: "{{ gcp_project }}"
+#        id: "{{ gcp_project }}"
+#        parent:
+#          type: organization
+#          id: "{{ account_id }}"
+#        auth_kind: serviceaccount
+#        state: present
+
+    - name: Create a disk
+      google.cloud.gcp_compute_disk:
+        name: rollback-disk-instance
+        size_gb: 20
+        source_image: projects/debian-cloud/global/images/family/debian-12
+        zone: "{{ region }}-a"
+        project: "{{ gcp_project }}"
+        auth_kind: serviceaccount
+        state: present
+      register: disk
+
+#    - name: Create a network
+#      google.cloud.gcp_compute_network:
+#        name: rollback-network-instance
+#        region: "{{ region }}"
+#        project: "{{ gcp_project }}"
+#        auth_kind: serviceaccount
+#        state: present
+#      register: network
+#
+#    - name: Create a address
+#      google.cloud.gcp_compute_address:
+#        name: rollback-address-instance
+#        region: "{{ region }}"
+#        project: "{{ gcp_project }}"
+#        auth_kind: serviceaccount
+#        state: present
+#      register: address
+#
+#    - name: Create a instance
+#      google.cloud.gcp_compute_instance:
+#        name: rollback-instance
+#        machine_type: e2-micro
+#        deletion_protection: true
+#        disks:
+#          - auto_delete: 'true'
+#            boot: 'true'
+#            source: "{{ disk }}"
+#          - auto_delete: 'true'
+#            interface: NVME
+#            type: SCRATCH
+#            initialize_params:
+#              disk_type: local-ssd
+##        metadata:
+##          startup-script-url: gs:://graphite-playground/bootstrap.sh
+##          cost-center: '12345'
+#        labels:
+#          environment: production
+#        network_interfaces:
+#          - network: "{{ network }}"
+#            access_configs:
+#              - name: External NAT
+#                nat_ip: "{{ address }}"
+#                type: ONE_TO_ONE_NAT
+#        zone: "{{ region }}-a"
+#        project: "{{ gcp_project }}"
+#        auth_kind: serviceaccount
+#        state: present

@@ -1,0 +1,18 @@
+- name: Test TAG creation
+  hosts: localhost
+  connection: local
+  gather_facts: False
+  vars_files:
+    - vars.yml
+
+  tasks:
+    - name: Create a TAG on two Volumes
+      amazon.aws.ec2_tag:
+        resource: '{{ item }}'
+        tags:
+          App: RollbackApp
+          Env: production
+        state: present
+        region: "{{ region }}"
+      loop: "{{ volumes_to_tag }}"
+

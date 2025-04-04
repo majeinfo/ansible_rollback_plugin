@@ -1,0 +1,16 @@
+- name: Test a VPC DHCP options creation
+  hosts: localhost
+  connection: local
+  gather_facts: False
+  vars_files:
+    - vars.yml
+
+  tasks:
+   - name: Create DHCP options
+     amazon.aws.ec2_vpc_dhcp_option:
+       domain_name: test.name.com
+       dns_servers:
+         - 8.8.8.8
+       region: "{{ region }}"
+
+

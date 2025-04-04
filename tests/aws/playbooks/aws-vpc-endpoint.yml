@@ -1,0 +1,27 @@
+- name: Test a VPC endpoint creation
+  hosts: localhost
+  connection: local
+  gather_facts: False
+  vars_files:
+    - vars.yml
+
+  tasks:
+    - name: Create a VPC
+      amazon.aws.ec2_vpc_net:
+        name: rollback_vpc
+        cidr_block: "10.10.0.0/16"
+        region: "{{ region }}"
+      register: vpc
+
+    - name: Create a VPC Endpoint
+      amazon.aws.ec2_vpc_endpoint:
+        service: com.amazonaws.{{ region }}.ec2
+        vpc_id: "{{ vpc.vpc.id }}"
+        vpc_endpoint_type: Interface
+        #vpc_endpoint_subnets:
+        #  - subnet-556c9d18
+        tags:
+          Name: rollback_endpoint
+        region: "{{ region }}"
+
+

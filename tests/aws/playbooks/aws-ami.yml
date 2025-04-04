@@ -1,0 +1,16 @@
+- name: Test AMI creation
+  hosts: localhost
+  connection: local
+  gather_facts: False
+  vars_files:
+    - vars.yml
+
+  tasks:
+    - name: Create an AMI
+      amazon.aws.ec2_ami:
+        name: rollback_ami
+        instance_id: "{{ ec2_instance_id }}"
+        state: present
+        region: "{{ region }}"
+
+

@@ -1,0 +1,13 @@
+---
+# Account ID
+account_id: "{{ lookup('env', 'GCP_ACCOUNT_ID') }}"
+
+# Region for testing
+region: "{{ lookup('env', 'GCP_REGION') }}"
+
+# GCP Project
+gcp_project: "{{ lookup('env', 'GCP_PROJECT') }}"
+
+
+
+

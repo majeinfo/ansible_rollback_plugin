@@ -1,0 +1,37 @@
+---
+# Account ID
+account_id: "{{ lookup('env', 'AWS_ACCOUNT_ID') }}"
+
+# Region for testing
+region: "{{ lookup('env', 'AWS_REGION') }}"
+
+# Existing EC2 instance id for creating AMI, etc...
+ec2_instance_id: "i-0acc3d58dcb476127"
+
+# Existing Key Name for EC2
+ec2_key_name: "{{ lookup('env', 'AWS_EC2_KEY_NAME') }}"
+
+# Existing AMI
+ami_id: "ami-0918d360198af7fcf"
+
+# AMI ID for Spot instance
+spot_instance_ami_id: "ami-00ac45f3035ff009e"
+
+# AMI for Launch Template
+launch_template_ami_id: "ami-0160e8d70ebc43ee1"
+
+# Prefix for S3 Bucket name
+s3_prefix: "{{ lookup('env', 'AWS_S3_PREFIX') }}"
+
+# Bucket to copy an object from
+s3_src_bucket: "{{ lookup('env', 'AWS_S3_SRC_BUCKET') }}"
+
+# Existing Route53 Zone
+route53_zone: "{{ lookup('env', 'AWS_ROUTE53_ZONE') }}"
+
+# Existing Volume ID
+volume_id: "vol-0f7e7e81b950d7f15"
+
+# Volumes to be tagged - loop testing
+volumes_to_tag: ["vol-0f40e5a19e7060158", "vol-0f7e7e81b950d7f15"]
+

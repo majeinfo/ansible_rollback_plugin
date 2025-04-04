@@ -1,0 +1,44 @@
+- name: Test S3 object creation
+  hosts: localhost
+  connection: local
+  gather_facts: False
+  vars_files:
+    - vars.yml
+
+  vars:
+    bucket: "{{ s3_prefix }}-rollback-test"
+
+  tasks:
+    - name: Create an empty bucket
+      amazon.aws.s3_bucket:
+        name: '{{ bucket }}'
+        state: present
+        region: "{{ region }}"
+
+    - name: Create a Bucket Directory
+      amazon.aws.s3_object:
+        bucket: '{{ bucket }}'
+        object: 'dir/subpath'
+        mode: create
+        region: "{{ region }}"
+
+    - name: Copy an object already stored in another bucket
+      amazon.aws.s3_object:
+        region: "{{ region }}"
+        bucket: '{{ bucket }}'
+        object: 'dir/subpath/key.txt'
+        mode: copy
+        copy_src:
+          bucket: "{{ s3_src_bucket }}"
+          object: 'index.html'
+
+    - name: Simple PUT operation
+      amazon.aws.s3_object:
+        region: "{{ region }}"
+        bucket: '{{ bucket }}'
+        object: 'dir/subpath/key2.txt'
+        src: /tmp/myfile.txt
+        mode: put
+
+
+

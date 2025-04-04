@@ -1,0 +1,77 @@
+- name: Test IAM creation
+  hosts: localhost
+  connection: local
+  gather_facts: False
+  vars_files:
+    - vars.yml
+
+  tasks:
+    - name: Create an IAM Group
+      amazon.aws.iam_group:
+        name: rollback_group
+        state: present
+        region: "{{ region }}"
+
+    - name: Create an IAM User
+      amazon.aws.iam_user:
+        name: rollback_user
+        state: present
+        region: "{{ region }}"
+
+    - name: Create an IAM Role
+      amazon.aws.iam_role:
+        name: rollback_role
+        assume_role_policy_document: >-
+          {
+            "Version": "2012-10-17",
+            "Statement": [
+              {
+                "Effect": "Allow",
+                "Principal": { "Service": "ec2.amazonaws.com" },
+                "Action": "sts:AssumeRole"
+              }
+            ]
+          }
+        state: present
+        region: "{{ region }}"
+
+    - name: Always pause after IAM Role creation
+      ansible.builtin.pause:
+        seconds: 15
+
+    - name: Create Access Key
+      amazon.aws.iam_access_key:
+        user_name: rollback_user
+        state: present
+
+    - name: Create Instance Profile
+      amazon.aws.iam_instance_profile:
+        name: rollback_instance_profile
+        role: rollback_role
+        state: present
+
+    - name: Update an IAM Managed Policy with a non default version
+      amazon.aws.iam_managed_policy:
+        policy_name: rollback_managed_policy
+        policy:
+          Version: "2012-10-17"
+          Statement:
+            - Effect: "Allow"
+              Action: "logs:CreateLogGroup"
+              Resource: "*"
+        make_default: false
+        state: present
+
+    - name: Create IAM Policy
+      amazon.aws.iam_policy:
+        iam_name: rollback_user
+        iam_type: user
+        policy_name: rollback_policy
+        policy_json:
+          Version: "2012-10-17"
+          Statement:
+            - Effect: "Allow"
+              Action: "logs:CreateLogGroup"
+              Resource: "*"
+        state: present
+

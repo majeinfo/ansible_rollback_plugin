@@ -1,0 +1,80 @@
+- name: Create multiple resources
+  hosts: localhost
+  connection: local
+  gather_facts: False
+  vars_files:
+    - vars.yml
+
+  tasks:
+    - name: Create a VPC
+      amazon.aws.ec2_vpc_net:
+        name: rollback_vpc
+        cidr_block: "10.10.0.0/16"
+        region: "{{ region }}"
+      register: vpc
+
+    - name: Create a Subnet
+      amazon.aws.ec2_vpc_subnet:
+        cidr: "10.10.1.0/24"
+        region: "{{ region }}"
+        vpc_id: "{{ vpc.vpc.id }}"
+        tags: 
+          Name: rollback_subnet
+      register: subnet
+
+    - name: Create a SecurityGroup
+      amazon.aws.ec2_security_group:
+        name: rollback_sg
+        description: test secgroup
+        region: "{{ region }}"
+        vpc_id: "{{ vpc.vpc.id }}"
+        rules:
+          - proto: tcp
+            ports:
+              - 22
+            cidr_ip: 0.0.0.0/0
+      register: secgrp
+
+    - name: Create an IAM Role
+      amazon.aws.iam_role:
+        name: rollback_role
+        assume_role_policy_document: >-
+          {
+            "Version": "2012-10-17",
+            "Statement": [
+              {
+                "Effect": "Allow",
+                "Principal": { "Service": "ec2.amazonaws.com" },
+                "Action": "sts:AssumeRole"
+              }
+            ]
+          }
+        state: present
+        region: "{{ region }}"
+
+    - name: Launch instance
+      amazon.aws.ec2_instance:
+         key_name: "{{ ec2_key_name }}"
+         security_group: "{{ secgrp.group_id }}"
+         instance_type: "t3.nano"
+         #tags:
+         #  TmpName: "K8S-FORMATION"
+         instance_role: rollback_role
+         image_id: "{{ ami_id }}"
+         wait: true
+         region: "{{ region }}"
+         termination_protection: true
+         vpc_subnet_id: "{{ subnet.subnet.id }}"
+         volumes:
+           - device_name: /dev/xvda
+             ebs:
+               volume_size: 10
+               volume_type: gp3
+               delete_on_termination: true
+         count: 1
+         state: running
+         #filters:
+         #  tag:TmpName: "K8S-FORMATION"
+      register: ec2
+
+

@@ -1,0 +1,21 @@
+- name: Test SecurityGroup creation
+  hosts: localhost
+  connection: local
+  gather_facts: False
+  vars_files:
+    - vars.yml
+
+  tasks:
+    - name: Create a SecurityGroup
+      amazon.aws.ec2_security_group:
+        name: rollback_sg
+        description: test secgroup
+        region: "{{ region }}"
+        rules:
+          - proto: icmp
+            icmp_type: 3
+            icmp_code: 1
+            cidr_ip: 0.0.0.0/0
+
+
+

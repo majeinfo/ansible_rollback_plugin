@@ -1,0 +1,33 @@
+- name: Test ENI creation
+  hosts: localhost
+  connection: local
+  gather_facts: False
+  vars_files:
+    - vars.yml
+
+  tasks:
+    - name: Create a VPC
+      amazon.aws.ec2_vpc_net:
+        name: rollback_vpc
+        cidr_block: "10.10.0.0/16"
+        region: "{{ region }}"
+      register: vpc
+
+    - name: Create a Subnet
+      amazon.aws.ec2_vpc_subnet:
+        cidr: "10.10.1.0/24"
+        region: "eu-west-3"
+        vpc_id: "{{ vpc.vpc.id }}"
+        tags: 
+          Name: rollback_subnet
+      register: subnet
+
+    - name: Create ENI Interface
+      amazon.aws.ec2_eni:
+        name: rollback_eni
+        private_ip_address: 10.10.1.123
+        subnet_id: "{{ subnet.subnet.id }}"
+        state: present
+        region: "{{ region }}"
+
+

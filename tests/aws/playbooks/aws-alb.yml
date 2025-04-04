@@ -1,0 +1,78 @@
+- name: Test ALB creation
+  hosts: localhost
+  connection: local
+  gather_facts: False
+  vars_files:
+    - vars.yml
+
+  tasks:
+    - name: Create a VPC
+      amazon.aws.ec2_vpc_net:
+        name: rollback_vpc_alb
+        cidr_block: "10.10.0.0/16"
+        region: "{{ region }}"
+      register: vpc
+
+    - name: Create a SecurityGroup
+      amazon.aws.ec2_security_group:
+        name: rollback_sg_alb
+        vpc_id: "{{ vpc.vpc.id }}"
+        description: test secgroup
+        region: "{{ region }}"
+        rules:
+          - proto: tcp
+            ports:
+              - 80
+              - 443
+            cidr_ip: 0.0.0.0/0
+
+    - name: Create a VPC IGW
+      amazon.aws.ec2_vpc_igw:
+        vpc_id: "{{ vpc.vpc.id }}"
+        region: "{{ region }}"
+        tags:
+          Name: my-igw-alb
+
+    - name: Create a Subnet in AZ a
+      amazon.aws.ec2_vpc_subnet:
+        cidr: "10.10.1.0/24"
+        region: "{{ region }}"
+        vpc_id: "{{ vpc.vpc.id }}"
+        az: "{{ region }}a"
+        tags:
+          Name: rollback_subnet_alb_a
+      register: subnet_a
+
+    - name: Create a Subnet in AZ b
+      amazon.aws.ec2_vpc_subnet:
+        cidr: "10.10.2.0/24"
+        region: "{{ region }}"
+        vpc_id: "{{ vpc.vpc.id }}"
+        az: "{{ region }}b"
+        tags:
+          Name: rollback_subnet_alb_b
+      register: subnet_b
+
+    - name: Create an ALB
+      amazon.aws.elb_application_lb:
+        name: rollback-alb
+        security_groups:
+          - rollback_sg_alb
+        subnets:
+          - "{{ subnet_a.subnet.id }}"
+          - "{{ subnet_b.subnet.id }}"
+
+        #listeners:
+        #  - Protocol: HTTP # Required. The protocol for connections from clients to the load balancer (HTTP or HTTPS) (case-sensitive).
+        #    Port: 80 # Required. The port on which the load balancer is listening.
+        #    # The security policy that defines which ciphers and protocols are supported. The default is the current predefined security policy.
+        #    #SslPolicy: ELBSecurityPolicy-2015-05
+        #    #Certificates: # The ARN of the certificate
+        #    #  - CertificateArn: arn:aws:iam::123456789012:server-certificate/test.domain.com
+        #    #DefaultActions:
+        #    #  - Type: forward 
+        #    #    TargetGroupName: rollback-target-group-name
+        state: present
+        region: "{{ region }}"
+
+

@@ -1,0 +1,97 @@
+- name: Test Lambda creation
+  hosts: localhost
+  connection: local
+  gather_facts: False
+  vars_files:
+    - vars.yml
+
+  vars:
+    lambda_role: rollback-lambda-role
+    lambda_name: rollbackFunc
+    lambda_layer: rollbackLayer
+    runtime: python3.12
+    zip_file: files/hello.zip
+    handler: hello.lambda_handler
+
+  tasks:
+    - name: Create an IAM Role
+      amazon.aws.iam_role:
+        name: "{{ lambda_role }}"
+        assume_role_policy_document: >-
+          {
+            "Version": "2012-10-17",
+            "Statement": [
+              {
+                "Effect": "Allow",
+                "Principal": { "Service": "lambda.amazonaws.com" },
+                "Action": "sts:AssumeRole"
+              }      
+            ]
+          }
+        state: present
+        region: "{{ region }}"
+      register: role
+
+    - name: Create IAM Policy
+      amazon.aws.iam_policy:
+        iam_name: "{{ lambda_role }}"
+        iam_type: role
+        policy_name: rollback_lambda_policy
+        policy_json: >-
+          {
+            "Version": "2012-10-17",
+            "Statement": [
+              {
+                "Effect": "Allow",
+                "Action": "logs:CreateLogGroup",
+                "Resource": "arn:aws:logs:{{ region }}:{{ account_id }}:*"
+              },
+              {
+                "Effect": "Allow",
+                "Action": [
+                  "logs:CreateLogStream",
+                  "logs:PutLogEvents"
+                ],
+                "Resource": [
+                  "arn:aws:logs:eu-west-3:{{ region }}:log-group:/aws/lambda/{{ lambda_name }}:*"
+                ]
+              }
+            ]
+          }
+
+    - name: Always pause after IAM Role creation
+      ansible.builtin.pause:
+        seconds: 20
+
+    - name: Create a Lambda function
+      amazon.aws.lambda:
+        name: '{{ lambda_name }}'
+        region: "{{ region }}"
+        state: present
+        zip_file: '{{ playbook_dir }}/../{{ zip_file }}'
+        runtime: '{{ runtime }}'
+        role: '{{ role.iam_role.arn }}'
+        handler: '{{ handler }}'
+
+    - name: Create a Lambda Alias
+      amazon.aws.lambda_alias:
+        function_name: "{{ lambda_name }}"
+        name: "{{ lambda_name }}-alias"
+        region: "{{ region }}"
+        description: Development version
+
+    - name: Create a new layer for Lambda
+      amazon.aws.lambda_layer:
+        name: "{{ lambda_layer }}"
+        region: "{{ region }}"
+        description: 'Rollback layer'
+        content:
+          zip_file: '{{ playbook_dir }}/../{{ zip_file }}'
+        compatible_runtimes:
+          - "{{ runtime }}"
+        license_info: MIT
+        compatible_architectures:
+          - x86_64
+
+
+

@@ -1,0 +1,16 @@
+- name: Test Placement Group creation
+  hosts: localhost
+  connection: local
+  gather_facts: False
+  vars_files:
+    - vars.yml
+
+  tasks:
+    - name: Create a Placement Group
+      amazon.aws.ec2_placement_group:
+        name: rollback_placement_grp
+        strategy: cluster
+        state: present
+        region: "{{ region }}"
+
+

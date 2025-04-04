@@ -1,0 +1,15 @@
+- name: Test KEY creation
+  hosts: localhost
+  connection: local
+  gather_facts: False
+  vars_files:
+    - vars.yml
+
+  tasks:
+    - name: Create a Key pair
+      amazon.aws.ec2_key:
+        name: rollback_key
+        state: present
+        region: "{{ region }}"
+
+

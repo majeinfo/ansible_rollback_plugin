@@ -1,0 +1,22 @@
+- name: Test two Volumes creation with a loop
+  hosts: localhost
+  connection: local
+  gather_facts: False
+  vars_files:
+    - vars.yml
+
+  tasks:
+    - name: Create a Volume
+      amazon.aws.ec2_vol:
+        region: "{{ region }}"
+        state: present
+        volume_type: gp3
+        volume_size: "{{ item }}"
+        zone: "{{ region }}a"
+      register: volume
+      loop:
+        - 7
+        - 9
+
+    - debug:
+        var: volume

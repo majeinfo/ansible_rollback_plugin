@@ -1,0 +1,75 @@
+- name: Test Backup Vault and Plan 
+  hosts: localhost
+  connection: local
+  gather_facts: False
+  vars_files:
+    - vars.yml
+
+  vars:
+    backup_vault_name: rollback-vault
+    backup_plan_name: rollback-backup-plan
+    backup_role: rollback_backup_role
+
+  tasks:
+    - name: Create backup vault
+      amazon.aws.backup_vault:
+        state: present
+        backup_vault_name: "{{ backup_vault_name }}"
+        #encryption_key_arn: arn:aws:kms:us-west-2:111122223333:key/1234abcd-12ab-34cd-56ef-1234567890ab
+        region: "{{ region }}"
+
+    - name: Create an AWSbackup plan
+      amazon.aws.backup_plan:
+        state: present
+        backup_plan_name: "{{ backup_plan_name }}"
+        region: "{{ region }}"
+        #advanced_backup_settings:
+        #  - resource_type: "EC2"
+        #    backup_options:
+        #      WindowsVSS: disabled
+        rules:
+          - rule_name: daily
+            target_backup_vault_name: "{{ backup_vault_name }}"
+            schedule_expression: 'cron(0 5 ? * * *)'
+            start_window_minutes: 60
+            completion_window_minutes: 1440
+
+    - name: Create an IAM Role
+      amazon.aws.iam_role:
+        name: "{{ backup_role }}"
+        assume_role_policy_document: >-
+          {
+            "Version": "2012-10-17",
+            "Statement": [
+              {
+                "Effect": "Allow",
+                "Principal": { "Service": "backup.amazonaws.com" },
+                "Action": "sts:AssumeRole"
+              }
+            ]
+          }
+        managed_policies:
+          - arn:aws:iam::aws:policy/AWSBackupFullAccess
+          - arn:aws:iam::aws:policy/AmazonElasticFileSystemClientFullAccess
+        state: present
+        region: "{{ region }}"
+      register: role
+
+    - name: Always pause after IAM Role creation
+      ansible.builtin.pause:
+        seconds: 15
+
+    - name: Create a Backup Selection
+      amazon.aws.backup_selection:
+        selection_name: rollback-selection
+        backup_plan_name: "{{ backup_plan_name }}"
+        iam_role_arn: "{{ role.iam_role.arn }}"
+        resources:
+          - arn:aws:elasticfilesystem:*:*:file-system/*
+        list_of_tags:
+          - condition_type: STRINGEQUALS
+            condition_key: Dummy
+            condition_value: Any
+        region: "{{ region }}"
+
+

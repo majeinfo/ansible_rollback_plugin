@@ -1,0 +1,22 @@
+- name: Test ELB creation
+  hosts: localhost
+  connection: local
+  gather_facts: False
+  vars_files:
+    - vars.yml
+
+  tasks:
+    - name: Create an ELB
+      amazon.aws.elb_classic_lb:
+        name: rollback-elb
+        zones:
+          - "{{ region }}a"
+          - "{{ region }}b"
+        listeners:
+          - protocol: http
+            load_balancer_port: 80
+            instance_port: 80
+        state: present
+        region: "{{ region }}"
+
+

@@ -1,0 +1,32 @@
+- name: Test a VPC NAT Gateway creation
+  hosts: localhost
+  connection: local
+  gather_facts: False
+  vars_files:
+    - vars.yml
+
+  tasks:
+    - name: Create a VPC
+      amazon.aws.ec2_vpc_net:
+        name: rollback_vpc
+        cidr_block: "10.10.0.0/16"
+        region: "{{ region }}"
+      register: vpc
+
+    - name: Create a Subnet
+      amazon.aws.ec2_vpc_subnet:
+        cidr: "10.10.1.0/24"
+        region: "{{ region }}"
+        vpc_id: "{{ vpc.vpc.id }}"
+        tags: 
+          Name: rollback_subnet
+      register: subnet
+
+    - name: Create a VPC NAT Gateway
+      amazon.aws.ec2_vpc_nat_gateway:
+        subnet_id: "{{ subnet.subnet.id }}"
+        region: "{{ region }}"
+        tags:
+          Name: rollback-natgw
+
+

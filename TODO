@@ -1,0 +1,5 @@
+* map sensitive data to user defined variables ?
+* handling of Secrets ?
+* implements new AWS modules
+* implements GCP modules
+* implements Azure modules

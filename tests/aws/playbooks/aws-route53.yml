@@ -1,0 +1,17 @@
+- name: Test Route53 Record creation
+  hosts: localhost
+  connection: local
+  gather_facts: False
+  vars_files:
+    - vars.yml
+
+  tasks:
+    - name: Create a Route53 Record
+      amazon.aws.route53:
+        zone: "{{ route53_zone }}"
+        record: "rollback.{{ route53_zone }}"
+        type: A
+        value: "1.2.3.4"
+        state: present
+
+

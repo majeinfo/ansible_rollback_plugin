@@ -1,0 +1,22 @@
+- name: Test a VPC NACL creation
+  hosts: localhost
+  connection: local
+  gather_facts: False
+  vars_files:
+    - vars.yml
+
+  tasks:
+    - name: Create a VPC
+      amazon.aws.ec2_vpc_net:
+        name: rollback_vpc
+        cidr_block: "10.10.0.0/16"
+        region: "{{ region }}"
+      register: vpc
+
+    - name: Create a VPC NACL
+      amazon.aws.ec2_vpc_nacl:
+        name: rollback_vpc_nacl
+        vpc_id: "{{ vpc.vpc.id }}"
+        region: '{{ region }}'
+        state: present
+
