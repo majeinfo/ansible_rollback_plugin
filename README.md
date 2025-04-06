@@ -110,5 +110,7 @@ played to delete the resources previously created.
 
 | Module | Supported |
 | :--- |:----------|
+| ```google.cloud.gcp_compute_address``` | ```Yes``` |
 | ```google.cloud.gcp_compute_disk``` | ```Yes``` |
+| ```google.cloud.gcp_compute_network``` | ```Yes``` |
 

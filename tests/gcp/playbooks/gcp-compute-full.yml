@@ -27,23 +27,24 @@
         state: present
       register: disk
 
-#    - name: Create a network
-#      google.cloud.gcp_compute_network:
-#        name: rollback-network-instance
-#        region: "{{ region }}"
-#        project: "{{ gcp_project }}"
-#        auth_kind: serviceaccount
-#        state: present
-#      register: network
-#
-#    - name: Create a address
-#      google.cloud.gcp_compute_address:
-#        name: rollback-address-instance
-#        region: "{{ region }}"
-#        project: "{{ gcp_project }}"
-#        auth_kind: serviceaccount
-#        state: present
-#      register: address
+    - name: Create a network
+      google.cloud.gcp_compute_network:
+        name: rollback-network-instance
+        auto_create_subnetworks: false
+        region: "{{ region }}"
+        project: "{{ gcp_project }}"
+        auth_kind: serviceaccount
+        state: present
+      register: network
+
+    - name: Create a address
+      google.cloud.gcp_compute_address:
+        name: rollback-address-instance
+        region: "{{ region }}"
+        project: "{{ gcp_project }}"
+        auth_kind: serviceaccount
+        state: present
+      register: address
 #
 #    - name: Create a instance
 #      google.cloud.gcp_compute_instance:

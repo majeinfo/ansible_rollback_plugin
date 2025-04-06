@@ -1,0 +1,19 @@
+- name: Create multiple compute resources
+  hosts: localhost
+  connection: local
+  gather_facts: False
+  vars_files:
+    - vars.yml
+
+  tasks:
+    - name: Create a disk
+      google.cloud.gcp_compute_disk:
+        name: rollback-disk-instance
+        size_gb: 20
+        source_image: projects/debian-cloud/global/images/family/debian-12
+        zone: "{{ region }}-a"
+        project: "{{ gcp_project }}"
+        auth_kind: serviceaccount
+        state: present
+      register: disk
+

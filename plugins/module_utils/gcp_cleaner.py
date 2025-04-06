@@ -30,6 +30,19 @@ class GCPCleaner(CleanerBase):
         return "google.cloud"
 
     @gcp_check_state_present
+    def _gcp_compute_address(self, module_name, result):
+        module_args = result._result.get('invocation').get('module_args')
+        name = module_args.get('name')
+        self.callback._debug(f"GCP Compute Address {name}")
+
+        return {
+            module_name: {
+                'state': 'absent',
+                'name': self._to_text(name),
+            }
+        }
+
+    @gcp_check_state_present
     def _gcp_compute_disk(self, module_name, result):
         module_args = result._result.get('invocation').get('module_args')
         name = module_args.get('name')
@@ -41,6 +54,23 @@ class GCPCleaner(CleanerBase):
                 'state': 'absent',
                 'name': self._to_text(name),
                 'zone': self._to_text(zone),
+            }
+        }
+
+    @gcp_check_state_present
+    def _gcp_compute_network(self, module_name, result):
+        module_args = result._result.get('invocation').get('module_args')
+        name = module_args.get('name')
+        #auto_create_subnets = module_args.get('auto_create_subnets')
+        self.callback._debug(f"GCP Compute Network {name}")
+
+        # If subnets have been create automatically, they are also deleted
+        # by the Ansible module
+
+        return {
+            module_name: {
+                'state': 'absent',
+                'name': self._to_text(name),
             }
         }
 
