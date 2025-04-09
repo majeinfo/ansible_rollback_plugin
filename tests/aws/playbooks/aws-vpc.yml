@@ -5,6 +5,9 @@
   vars_files:
     - vars.yml
 
+  vars:
+    region: eu-west-3
+
   tasks:
    - name: Create a VPC
      amazon.aws.ec2_vpc_net:

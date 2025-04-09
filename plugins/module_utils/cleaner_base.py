@@ -20,7 +20,7 @@ class CleanerBase(ABC):
         short_action_name = '_' + action_name[len(self.get_collection_prefix()) + 1:]
         if not hasattr(self, short_action_name):
             display.warning(f"Action {action_name} not supported (yet ?)")
-            return None
+            return [self._commented_action(action_name, result)]
 
         method = getattr(self, short_action_name)
         actions = method(action_name, result)
@@ -36,6 +36,15 @@ class CleanerBase(ABC):
     @abstractmethod
     def _generate_actions(self, action, action_name, result):
         pass
+
+    # Generate a commented Action (usually when the rollback cannnot be generated)
+    def _commented_action(self, action_name, result):
+        task_name = result._task_fields.get('name')
+        return {
+            'name': str(task_name) if task_name else "empty",
+            'message': f"module {action_name} not supported yet",
+            '_is_comment_': True,
+        }
 
     # Generate a pause between actions
     def _add_pause(self):

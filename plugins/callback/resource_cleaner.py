@@ -45,10 +45,8 @@ DOCUMENTATION = '''
 '''
 
 import sys
-import time
 from datetime import datetime
-import json
-import yaml
+from ruamel.yaml import YAML, CommentedMap, CommentedSeq
 import os
 import os.path
 import pprint
@@ -247,27 +245,61 @@ class CallbackModule(CallbackBase):
 
     # Generate the rollback playbook
     def rollback_playbook(self):
+        INDENTATION = 2
+
         # Do not generate empty playbook
         if not len(self.actions):
             return 
 
-        playbook = [
-            { 
+        commented_maps = CommentedSeq()
+        playbook = CommentedSeq([
+            CommentedMap({
                 'name': str(self.play.name),
                 'hosts': str(self.play.hosts[0]),
                 'connection': str(self.play.connection),
                 'gather_facts': self.play.gather_facts,
-                'tasks': self.actions, 
-            }
-        ]
+                'tasks': commented_maps,
+            })
+        ])
+
+        now = datetime.now()
+        now_str = now.strftime("%Y-%m-%d %H:%M:%S")
+        playbook.yaml_set_start_comment(f'Rollback playbook for playbook {self.playbook_name}\nGenerated date and time: {now_str}\n\n')
+
+        # Turn actions list into a CommentedMap list
+        # Commented actions may follow each other, we must buffer them otherwise
+        # only the last one will remain !
+        play = playbook[0]
+        current_comment = ''
+
+        for action in self.actions:
+            if '_is_comment_' in action:
+                current_comment += f"\nname: {action['name']}\n{action['message']}\n\n"
+            else:
+                commented_maps.append(CommentedMap(action))
+                if current_comment:
+                    if number := len(commented_maps):
+                        #play.get('tasks').yaml_set_comment_before_after_key(key=number-1, after=current_comment, indent=INDENTATION)
+                        play['tasks'][number - 1].yaml_set_start_comment(current_comment, indent=INDENTATION)
+                    else:
+                        play.yaml_set_comment_before_after_key(key='tasks', after=current_comment, indent=INDENTATION)
+                    current_comment = ''
+
+        if current_comment:
+            if number := len(commented_maps):
+                play.get('tasks').yaml_set_comment_before_after_key(key=number-1, after=current_comment, indent=INDENTATION)
+            else:
+                play.yaml_set_comment_before_after_key(key='tasks', after=current_comment, indent=INDENTATION)
 
         # Compute the rollback playbook name
-        suffix = datetime.now().strftime("%Y-%m-%d-%H-%M-%S")
+        suffix = now.strftime("%Y-%m-%d-%H-%M-%S")
         if self.rollback_playbook_suffix == 'rollback':
             suffix = "rollback"
 
+        yaml = YAML()
         with open(os.path.join(self.playbook_output_path, self.playbook_name + "." + suffix), 'w') as f:
-            yaml.dump(playbook, f, Dumper=IndentDumper, sort_keys=False)
+            #yaml.dump(playbook, f, Dumper=IndentDumper, sort_keys=False)
+            yaml.dump(playbook, f)
 
     # Convert AnsibleUnsafeText into a real str (needed for the YAML dumper)
     def _to_text(self, value):
@@ -284,8 +316,8 @@ class CallbackModule(CallbackBase):
             self._info(msg)
 
 
-class IndentDumper(yaml.Dumper):
-    def increase_indent(self, flow=False, indentless=False):
-        return super().increase_indent(flow, False)
+# class IndentDumper(yaml.Dumper):
+#     def increase_indent(self, flow=False, indentless=False):
+#         return super().increase_indent(flow, False)
 
 # EOF

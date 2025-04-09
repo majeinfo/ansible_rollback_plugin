@@ -437,8 +437,8 @@ class AWSCleaner(CleanerBase):
         # Add some time to avoid locking
         actions.append(self._add_pause())
 
-        return actions 
-    
+        return actions
+
     @aws_check_state_present
     def _ec2_vpc_net(self, module_name, result):
         vpc = result._result.get('vpc')
@@ -468,19 +468,6 @@ class AWSCleaner(CleanerBase):
                 #'vpc_id': self._to_text(vpc_id),
                 'route_table_id': self._to_text(route_table_id),
                 'lookup': 'id',
-            }
-        }
-
-    @aws_check_state_present
-    def _ec2_vpc_net(self, module_name, result):
-        vpc = result._result.get('vpc')
-        vpc_id = vpc.get('id')
-        self.callback._debug(f"vpc {vpc_id}")
-
-        return {
-            module_name: {
-                'state': 'absent',
-                'vpc_id': self._to_text(vpc_id),
             }
         }
 
@@ -853,7 +840,7 @@ class AWSCleaner(CleanerBase):
             action_module_name = list(action.keys())[0]
             if action_module_name.startswith(self.get_collection_prefix()):
                 # TODO: handle secret ! do not write sensitive data
-                for key in ('access_key', 'secret_key', 'region', 'aws_config', 'profile'):
+                for key in ('access_key', 'secret_key', 'region', 'aws_config', 'profile', 'session_token'):
                     if value := module_args.get(key):
                         final_action[action_module_name][key] = self._to_text(value)
 
