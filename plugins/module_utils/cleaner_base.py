@@ -60,11 +60,11 @@ class CleanerBase(ABC):
         return super(type(value), value).__str__()
 
 
-# Decorator for unsupported module
+# Decorator for unsupported module - returns a commented action
 def not_supported(func):
     def _not_supported(self, module_name, result):
         display.warning(f"Module {module_name} not yet implemented !")
-        return None
+        return [self._commented_action(module_name, result)]
 
     return _not_supported
 

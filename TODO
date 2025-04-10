@@ -1,4 +1,5 @@
 * map sensitive data to user defined variables ?
+* handle check mode ?
 * handling of Secrets ?
 * implements new AWS modules
 * implements GCP modules

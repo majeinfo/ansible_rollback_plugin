@@ -7,7 +7,7 @@ from .cleaner_base import CleanerBase, not_supported
 def gcp_check_state_present(func):
     '''
     Decorator that ensures the resource is created.
-    There is no rollback to do if it is not !
+    There is no rollback to do if the resource is not created !
     '''
     def _check_state_present(self, module_name, result):
         module_args = result._result.get('invocation').get('module_args')

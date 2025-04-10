@@ -439,6 +439,7 @@ class AWSCleaner(CleanerBase):
 
         return actions
 
+    @not_supported
     @aws_check_state_present
     def _ec2_vpc_net(self, module_name, result):
         vpc = result._result.get('vpc')
@@ -471,6 +472,7 @@ class AWSCleaner(CleanerBase):
             }
         }
 
+    @not_supported
     @aws_check_state_present
     def _ec2_vpc_subnet(self, module_name, result):
         subnet = result._result.get('subnet')
