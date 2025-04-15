@@ -109,9 +109,18 @@ class GCPCleaner(CleanerBase):
             }
         }
 
-    @not_supported
+    @gcp_check_state_present
     def _gcp_compute_backend_service(self, module_name, result):
-        pass
+        module_args = result._result.get('invocation').get('module_args')
+        name = module_args.get('name')
+        self.callback._debug(f"GCP Compute Backend Service {name}")
+
+        return {
+            module_name: {
+                'state': 'absent',
+                'name': self._to_text(name),
+            }
+        }
 
     @gcp_check_state_present
     def _gcp_compute_disk(self, module_name, result):
@@ -152,13 +161,22 @@ class GCPCleaner(CleanerBase):
     def _gcp_compute_health_check(self, module_name, result):
         pass
 
-    @not_supported
+    @gcp_check_state_present
     def _gcp_compute_http_health_check(self, module_name, result):
-        pass
+        module_args = result._result.get('invocation').get('module_args')
+        name = module_args.get('name')
+        self.callback._debug(f"GCP Compute HTTP/S Health Check {name}")
 
-    @not_supported
+        return {
+            module_name: {
+                'state': 'absent',
+                'name': self._to_text(name),
+            }
+        }
+
+    @gcp_check_state_present
     def _gcp_compute_https_health_check(self, module_name, result):
-        pass
+        return self._gcp_compute_http_health_check(module_name, result)
 
     @not_supported
     def _gcp_compute_image(self, module_name, result):
@@ -202,9 +220,20 @@ class GCPCleaner(CleanerBase):
         return actions
 
 
-    @not_supported
+    @gcp_check_state_present
     def _gcp_compute_instance_group(self, module_name, result):
-        pass
+        module_args = result._result.get('invocation').get('module_args')
+        name = module_args.get('name')
+        zone = module_args.get('zone')
+        self.callback._debug(f"GCP Compute Instance Group {name}")
+
+        return {
+            module_name: {
+                'state': 'absent',
+                'name': self._to_text(name),
+                'zone': self._to_text(zone),
+            }
+        }
 
     @gcp_check_state_present
     def _gcp_compute_instance_group_manager(self, module_name, result):

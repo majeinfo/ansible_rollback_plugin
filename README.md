@@ -121,7 +121,7 @@ played to delete the resources previously created.
 | ```google.cloud.gcp_compute_address```                                  | ```Yes``` |
 | ```google.cloud.gcp_compute_autoscaler```                               | ```Yes``` |
 | ```google.cloud.gcp_compute_backend_bucket```                           | ```Yes``` |
-| ```google.cloud.gcp_compute_backend_service```                          | ```No```  |
+| ```google.cloud.gcp_compute_backend_service```                          | ```Yes``` |
 | ```google.cloud.gcp_compute_disk```                                     | ```Yes``` |
 | ```google.cloud.gcp_compute_external_vpn_gateway```                     | ```No```  |
 | ```google.cloud.gcp_compute_firewall```                                 | ```No```  |
@@ -129,11 +129,11 @@ played to delete the resources previously created.
 | ```google.cloud.gcp_compute_global_address```                           | ```No```  |
 | ```google.cloud.gcp_compute_global_forwarding_rule```                   | ```No```  |
 | ```google.cloud.gcp_compute_health_check```                             | ```No```  |
-| ```google.cloud.gcp_compute_http_health_check```                        | ```No```  |
-| ```google.cloud.gcp_compute_https_health_check```                       | ```No```  |
+| ```google.cloud.gcp_compute_http_health_check```                        | ```Yes``` |
+| ```google.cloud.gcp_compute_https_health_check```                       | ```Yes``` |
 | ```google.cloud.gcp_compute_image```                                    | ```No```  |
 | ```google.cloud.gcp_compute_instance```                                 | ```Yes``` |
-| ```google.cloud.gcp_compute_instance_group```                           | ```No```  |
+| ```google.cloud.gcp_compute_instance_group```                           | ```Yes``` |
 | ```google.cloud.gcp_compute_instance_group_manager```                   | ```Yes``` |
 | ```google.cloud.gcp_compute_instance_template```                        | ```Yes``` |
 | ```google.cloud.gcp_compute_interconnect_attachment```                  | ```No```  |
