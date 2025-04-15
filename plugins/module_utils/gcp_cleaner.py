@@ -74,13 +74,40 @@ class GCPCleaner(CleanerBase):
             }
         }
 
-    @not_supported
+    @gcp_check_state_present
     def _gcp_compute_autoscaler(self, module_name, result):
-        pass
+        module_args = result._result.get('invocation').get('module_args')
+        name = module_args.get('name')
+        zone = module_args.get('zone')
+        target = module_args.get('target')
+        self_link = target.get('selfLink')
+        autoscaling_policy = module_args.get('autoscaling_policy')
+        self.callback._debug(f"GCP Compute Autoscaler {name}")
 
-    @not_supported
+        return {
+            module_name: {
+                'state': 'absent',
+                'name': self._to_text(name),
+                'zone': self._to_text(zone),
+                'target': { 'selfLink': self._to_text(self_link) }, # why so ?
+                'autoscaling_policy': { 'max_num_replicas': 0 }    # autoscaling_policy, # why so ?
+            }
+        }
+
+    @gcp_check_state_present
     def _gcp_compute_backend_bucket(self, module_name, result):
-        pass
+        module_args = result._result.get('invocation').get('module_args')
+        name = module_args.get('name')
+        bucket_name = module_args.get('bucket_name')
+        self.callback._debug(f"GCP Compute Backend Bucket {name}")
+
+        return {
+            module_name: {
+                'state': 'absent',
+                'name': self._to_text(name),
+                'bucket_name': self._to_text(bucket_name),
+            }
+        }
 
     @not_supported
     def _gcp_compute_backend_service(self, module_name, result):
@@ -137,21 +164,80 @@ class GCPCleaner(CleanerBase):
     def _gcp_compute_image(self, module_name, result):
         pass
 
-    @not_supported
+    @gcp_check_state_present
     def _gcp_compute_instance(self, module_name, result):
-        pass
+        module_args = result._result.get('invocation').get('module_args')
+        name = module_args.get('name')
+        zone = module_args.get('zone')
+
+        # nothing to rollback if this is not a real instance creation, just a modification:
+        if not module_args.get('disks') and not module_args.get('network_interfaces'):
+            return None
+
+        deletion_protection = module_args.get('deletion_protection')
+        self.callback._debug(f"GCP Compute Instance {name}")
+
+        actions = [{
+            module_name: {
+                'state': 'absent',
+                'name': self._to_text(name),
+                'zone': self._to_text(zone),
+            }
+        }]
+
+        if deletion_protection:
+            protect_off = {
+                module_name: {
+                    'state': 'present',
+                    'name': self._to_text(name),
+                    'zone': self._to_text(zone),
+                    'deletion_protection': False,
+                }
+            }
+            actions.insert(0, protect_off)
+
+        # Add some time to avoid locking
+        actions.append(self._add_pause())
+
+        return actions
+
 
     @not_supported
     def _gcp_compute_instance_group(self, module_name, result):
         pass
 
-    @not_supported
+    @gcp_check_state_present
     def _gcp_compute_instance_group_manager(self, module_name, result):
-        pass
+        module_args = result._result.get('invocation').get('module_args')
+        name = module_args.get('name')
+        zone = module_args.get('zone')
+        base_instance_name = module_args.get('base_instance_name')
+        instance_template = module_args.get('instance_template')
+        self_link = instance_template.get('selfLink')
+        self.callback._debug(f"GCP Compute Instance Group Manager {name}")
 
-    @not_supported
+        return {
+            module_name: {
+                'state': 'absent',
+                'name': self._to_text(name),
+                'zone': self._to_text(zone),
+                'base_instance_name': self._to_text(base_instance_name),
+                'instance_template': { 'selfLink': self._to_text(self_link) },
+            }
+        }
+
+    @gcp_check_state_present
     def _gcp_compute_instance_template(self, module_name, result):
-        pass
+        module_args = result._result.get('invocation').get('module_args')
+        name = module_args.get('name')
+        self.callback._debug(f"GCP Compute Instance Template {name}")
+
+        return {
+            module_name: {
+                'state': 'absent',
+                'name': self._to_text(name),
+            }
+        }
 
     @not_supported
     def _gcp_compute_interconnect_attachment(self, module_name, result):
@@ -173,10 +259,6 @@ class GCPCleaner(CleanerBase):
                 'name': self._to_text(name),
             }
         }
-
-    @not_supported
-    def _gcp_compute_network(self, module_name, result):
-        pass
 
     @not_supported
     def _gcp_compute_network_endpoint_group(self, module_name, result):
@@ -254,9 +336,26 @@ class GCPCleaner(CleanerBase):
     def _gcp_compute_ssl_policy(self, module_name, result):
         pass
 
-    @not_supported
+    @gcp_check_state_present
     def _gcp_compute_subnetwork(self, module_name, result):
-        pass
+        module_args = result._result.get('invocation').get('module_args')
+        name = module_args.get('name')
+        ip_cidr_range = module_args.get('ip_cidr_range')
+        network = module_args.get('network')
+        self_link = network.get('selfLink')
+        self.callback._debug(f"GCP Compute Subnetwetwork {name}")
+
+        # If subnets have been create automatically, they are also deleted
+        # by the Ansible module
+
+        return {
+            module_name: {
+                'state': 'absent',
+                'name': self._to_text(name),
+                'ip_cidr_range': self._to_text(ip_cidr_range),
+                'network': { 'selfLink': self._to_text(self_link) },
+            }
+        }
 
     @not_supported
     def _gcp_compute_target_http_proxy(self, module_name, result):
@@ -410,9 +509,18 @@ class GCPCleaner(CleanerBase):
     def _gcp_sql_user(self, module_name, result):
         pass
 
-    @not_supported
+    @gcp_check_state_present
     def _gcp_storage_bucket(self, module_name, result):
-        pass
+        module_args = result._result.get('invocation').get('module_args')
+        name = module_args.get('name')
+        self.callback._debug(f"GCP Storage Bucket {name}")
+
+        return {
+            module_name: {
+                'state': 'absent',
+                'name': self._to_text(name),
+            }
+        }
 
     @not_supported
     def _gcp_storage_bucket_access_control(self, module_name, result):

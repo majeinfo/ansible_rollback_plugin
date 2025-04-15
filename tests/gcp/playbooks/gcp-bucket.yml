@@ -1,0 +1,29 @@
+- name: Create Bucket resources
+  hosts: localhost
+  connection: local
+  gather_facts: False
+  vars_files:
+    - vars.yml
+
+  vars:
+    bucket_name: rollback-bucket
+    backend_bucket_name: rollback-backend-bucket
+
+  tasks:
+    - name: Create a bucket
+      google.cloud.gcp_storage_bucket:
+        name: "{{ bucket_name }}"
+        project: "{{ gcp_project }}"
+        auth_kind: serviceaccount
+        state: present
+      register: bucket
+
+    - name: Create a backend bucket
+      google.cloud.gcp_compute_backend_bucket:
+        name: "{{ backend_bucket_name }}"
+        bucket_name: "{{ bucket_name }}"
+        description: A Rollbacked BackendBucket
+        enable_cdn: 'false'
+        project: "{{ gcp_project }}"
+        auth_kind: serviceaccount
+        state: present

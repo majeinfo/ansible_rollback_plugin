@@ -5,12 +5,35 @@
   vars_files:
     - vars.yml
 
+  vars:
+    network_name: rollback-network-instance
+
   tasks:
     - name: Create a network
       google.cloud.gcp_compute_network:
-        name: rollback-network-instance
+        name: "{{ network_name }}"
         auto_create_subnetworks: false
         project: "{{ gcp_project }}"
+        auth_kind: serviceaccount
+        state: present
+      register: network
+
+    - name: Get the network details
+      gcp_compute_network_info:
+        project: "{{ gcp_project }}"
+        filters:
+          - name = {{ network_name }}
+        auth_kind: serviceaccount
+      register: network_info
+
+    - name: Create a subnet
+      google.cloud.gcp_compute_subnetwork:
+        name: rollback-subnet-instance
+        project: "{{ gcp_project }}"
+        network: "{{ network }}"
+          #selfLink: "{{ network_info.resources[0].selfLink }}"
+        ip_cidr_range: "172.16.0.0/16"
+        region: "{{ region }}"
         auth_kind: serviceaccount
         state: present
       register: network

@@ -5,6 +5,10 @@
   vars_files:
     - vars.yml
 
+  vars:
+    network_name: rollback-network-instance
+    subnet_name: rollback-subnet-instance
+
   tasks:
 #    - name: Create a project
 #      google.cloud.gcp_resourcemanager_project:
@@ -29,13 +33,31 @@
 
     - name: Create a network
       google.cloud.gcp_compute_network:
-        name: rollback-network-instance
+        name: "{{ network_name }}"
         auto_create_subnetworks: false
-        region: "{{ region }}"
         project: "{{ gcp_project }}"
         auth_kind: serviceaccount
         state: present
       register: network
+
+    - name: Get the network details
+      gcp_compute_network_info:
+        project: "{{ gcp_project }}"
+        filters:
+          - name = {{ network_name }}
+        auth_kind: serviceaccount
+      register: network_info
+
+    - name: Create a subnet
+      google.cloud.gcp_compute_subnetwork:
+        name: "{{ subnet_name }}"
+        project: "{{ gcp_project }}"
+        network: "{{ network }}"
+        ip_cidr_range: "172.16.0.0/16"
+        region: "{{ region }}"
+        auth_kind: serviceaccount
+        state: present
+      register: subnet_info
 
     - name: Create a address
       google.cloud.gcp_compute_address:
@@ -45,33 +67,34 @@
         auth_kind: serviceaccount
         state: present
       register: address
-#
-#    - name: Create a instance
-#      google.cloud.gcp_compute_instance:
-#        name: rollback-instance
-#        machine_type: e2-micro
-#        deletion_protection: true
-#        disks:
-#          - auto_delete: 'true'
-#            boot: 'true'
-#            source: "{{ disk }}"
-#          - auto_delete: 'true'
-#            interface: NVME
-#            type: SCRATCH
-#            initialize_params:
-#              disk_type: local-ssd
-##        metadata:
-##          startup-script-url: gs:://graphite-playground/bootstrap.sh
-##          cost-center: '12345'
-#        labels:
-#          environment: production
-#        network_interfaces:
-#          - network: "{{ network }}"
+
+    - name: Create a instance
+      google.cloud.gcp_compute_instance:
+        name: rollback-instance
+        machine_type: n2-standard-2
+        deletion_protection: true
+        disks:
+          - auto_delete: 'true'
+            boot: 'true'
+            source: "{{ disk }}"
+          - auto_delete: 'true'
+            interface: NVME
+            type: SCRATCH
+            initialize_params:
+              disk_type: local-ssd
+#        metadata:
+#          startup-script-url: gs:://graphite-playground/bootstrap.sh
+#          cost-center: '12345'
+        labels:
+          environment: production
+        network_interfaces:
+          - network: "{{ network }}"
 #            access_configs:
 #              - name: External NAT
 #                nat_ip: "{{ address }}"
 #                type: ONE_TO_ONE_NAT
-#        zone: "{{ region }}-a"
-#        project: "{{ gcp_project }}"
-#        auth_kind: serviceaccount
-#        state: present
+            subnetwork: "{{ subnet_info }}"
+        zone: "{{ region }}-a"
+        project: "{{ gcp_project }}"
+        auth_kind: serviceaccount
+        state: present

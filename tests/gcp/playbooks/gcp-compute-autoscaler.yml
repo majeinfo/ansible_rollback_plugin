@@ -1,0 +1,88 @@
+- name: Create an Autoscaler
+  hosts: localhost
+  connection: local
+  gather_facts: False
+  vars_files:
+    - vars.yml
+
+  vars:
+    network_name: rollback-network-instance
+    subnet_name: rollback-subnet-instance
+    template_name: rollback-template
+    group_mgr_name: rollback-group-manager
+    base_instance_name: rollback-basename
+    autoscaler_name: roolback-autoscaler
+
+  tasks:
+    - name: create a network
+      google.cloud.gcp_compute_network:
+        name: "{{ network_name }}"
+        auto_create_subnetworks: false
+        project: "{{ gcp_project }}"
+        auth_kind: serviceaccount
+        state: present
+      register: network
+
+    - name: Get the network details
+      gcp_compute_network_info:
+        project: "{{ gcp_project }}"
+        filters:
+          - name = {{ network_name }}
+        auth_kind: serviceaccount
+      register: network_info
+
+    - name: Create a subnet
+      google.cloud.gcp_compute_subnetwork:
+        name: "{{ subnet_name }}"
+        project: "{{ gcp_project }}"
+        network: "{{ network }}"
+        ip_cidr_range: "172.16.0.0/16"
+        region: "{{ region }}"
+        auth_kind: serviceaccount
+        state: present
+      register: subnet_info
+
+    - name: create a instance template
+      google.cloud.gcp_compute_instance_template:
+        name: "{{ template_name }}"
+        properties:
+          disks:
+            - auto_delete: 'true'
+              boot: 'true'
+              initialize_params:
+                source_image: projects/debian-cloud/global/images/family/debian-12
+          machine_type: n2-standard-2
+          network_interfaces:
+            - network: "{{ network }}"
+              subnetwork: "{{ subnet_info }}"
+        project: "{{ gcp_project }}"
+        auth_kind: serviceaccount
+        state: present
+      register: instancetemplate
+
+    - name: create a instance group manager
+      google.cloud.gcp_compute_instance_group_manager:
+        name: "{{ group_mgr_name }}"
+        base_instance_name: "{{ base_instance_name }}"
+        instance_template: "{{ instancetemplate }}"
+        target_size: 1
+        zone: "{{ region }}-a"
+        project: "{{ gcp_project }}"
+        auth_kind: serviceaccount
+        state: present
+      register: igm
+
+    - name: create a autoscaler
+      google.cloud.gcp_compute_autoscaler:
+        name: "{{ autoscaler_name }}"
+        zone: "{{ region }}-a"
+        target: "{{ igm }}"
+        autoscaling_policy:
+          max_num_replicas: 5
+          min_num_replicas: 1
+          cool_down_period_sec: 60
+          cpu_utilization:
+            utilization_target: 0.5
+        project: "{{ gcp_project }}"
+        auth_kind: serviceaccount
+        state: present
