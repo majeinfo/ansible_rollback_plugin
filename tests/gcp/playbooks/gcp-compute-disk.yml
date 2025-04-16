@@ -1,4 +1,4 @@
-- name: Create multiple compute resources
+- name: Create a disk
   hosts: localhost
   connection: local
   gather_facts: False

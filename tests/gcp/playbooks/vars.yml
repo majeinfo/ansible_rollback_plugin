@@ -8,6 +8,9 @@ region: "{{ lookup('env', 'GCP_REGION') }}"
 # GCP Project
 gcp_project: "{{ lookup('env', 'GCP_PROJECT') }}"
 
+# JSON credentials
+json_cred: "{{ lookup('env', 'GCP_SERVICE_ACCOUNT_FILE') }}"
+
 
 
 

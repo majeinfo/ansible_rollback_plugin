@@ -1,4 +1,4 @@
-- name: Create multiple compute resources
+- name: Create Address and Global Address
   hosts: localhost
   connection: local
   gather_facts: False
@@ -6,11 +6,19 @@
     - vars.yml
 
   tasks:
-    - name: Create a address
+    - name: Create an address
       google.cloud.gcp_compute_address:
-        name: rollback-address-instance
+        name: rollback-address
         region: "{{ region }}"
         project: "{{ gcp_project }}"
         auth_kind: serviceaccount
         state: present
       register: address
+
+    - name: Create a global address
+      google.cloud.gcp_compute_global_address:
+        name: rollback-global-address
+        project: "{{ gcp_project }}"
+        auth_kind: serviceaccount
+        state: present
+      register: global_address

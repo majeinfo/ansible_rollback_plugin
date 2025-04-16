@@ -1,0 +1,43 @@
+- name: Create an Region Backend Service
+  hosts: localhost
+  connection: local
+  gather_facts: False
+  vars_files:
+    - vars.yml
+
+  tasks:
+#    - name: Create a region instance group
+#      google.cloud.gcp_compute_instance_group:
+#        name: rollback-instancegroup-region-backendservice
+#        region: "{{ region }}"
+#        project: "{{ gcp_project }}"
+#        auth_kind: serviceaccount
+#        state: present
+#      register: instancegroup
+
+    - name: Create a health check
+      google.cloud.gcp_compute_health_check:
+        name: rollback-healthcheck
+        type: TCP
+        tcp_health_check:
+          port: 443
+        healthy_threshold: 10
+        timeout_sec: 2
+        unhealthy_threshold: 5
+        project: "{{ gcp_project }}"
+        auth_kind: serviceaccount
+        state: present
+      register: healthcheck
+
+    - name: Create a backend service
+      google.cloud.gcp_compute_region_backend_service:
+        name: rollback-region-backendservice
+        region: "{{ region }}"
+#        backends:
+#          - group: "{{ instancegroup.selfLink }}"
+        health_checks:
+          - "{{ healthcheck.selfLink }}"
+        enable_cdn: 'false'
+        project: "{{ gcp_project }}"
+        auth_kind: serviceaccount
+        state: present

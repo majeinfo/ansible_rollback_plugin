@@ -1,0 +1,32 @@
+- name: Create multiple compute resources
+  hosts: localhost
+  connection: local
+  gather_facts: False
+  vars_files:
+    - vars.yml
+
+  vars:
+    network_name: rollback-network
+
+  tasks:
+    - name: Create a network
+      google.cloud.gcp_compute_network:
+        name: "{{ network_name }}"
+        auto_create_subnetworks: false
+        project: "{{ gcp_project }}"
+        auth_kind: serviceaccount
+        state: present
+      register: network
+
+    - name: Create a route
+      google.cloud.gcp_compute_route:
+        name: rollback-route
+        dest_range: 192.168.6.0/24
+        next_hop_gateway: global/gateways/default-internet-gateway
+        network: "{{ network }}"
+        tags:
+          - backends
+          - databases
+        project: "{{ gcp_project }}"
+        auth_kind: serviceaccount
+        state: present

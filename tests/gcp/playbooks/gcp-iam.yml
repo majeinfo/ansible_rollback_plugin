@@ -1,0 +1,49 @@
+- name: Create IAM Objects
+  hosts: localhost
+  connection: local
+  gather_facts: False
+  vars_files:
+    - vars.yml
+
+  vars:
+    role_name: rollback_role
+    sa_name: rollback-sa
+
+  tasks:
+    - name: Create a role
+      google.cloud.gcp_iam_role:
+        name: "{{ role_name }}"
+        title: Rollback Role
+        description: Rollback role description
+        included_permissions:
+          - iam.roles.list
+          - iam.roles.create
+          - iam.roles.delete
+        project: "{{ gcp_project }}"
+        auth_kind: serviceaccount
+        state: present
+
+    - name: Create a service account
+      google.cloud.gcp_iam_service_account:
+        name: "{{ sa_name }}"
+        display_name: Rollback SA
+        project: "{{ gcp_project }}"
+        auth_kind: serviceaccount
+        state: present
+
+    - name: Clean result file
+      ansible.builtin.file:
+        path: "~/rollback_account.json"
+        state: absent
+
+    - name: Create a service account key
+      google.cloud.gcp_iam_service_account_key:
+        service_account:
+          name: "{{ sa_name }}@{{ gcp_project }}.iam.gserviceaccount.com"
+        private_key_type: TYPE_GOOGLE_CREDENTIALS_FILE
+        path: "~/rollback_account.json"
+        project: "{{ gcp_project }}"
+        auth_kind: serviceaccount
+        service_account_file: "{{ json_cred }}"
+        state: present
+

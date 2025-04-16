@@ -63,16 +63,7 @@ class GCPCleaner(CleanerBase):
 
     @gcp_check_state_present
     def _gcp_compute_address(self, module_name, result):
-        module_args = result._result.get('invocation').get('module_args')
-        name = module_args.get('name')
-        self.callback._debug(f"GCP Compute Address {name}")
-
-        return {
-            module_name: {
-                'state': 'absent',
-                'name': self._to_text(name),
-            }
-        }
+        return self._simple_name_rollback(module_name, result)
 
     @gcp_check_state_present
     def _gcp_compute_autoscaler(self, module_name, result):
@@ -111,16 +102,7 @@ class GCPCleaner(CleanerBase):
 
     @gcp_check_state_present
     def _gcp_compute_backend_service(self, module_name, result):
-        module_args = result._result.get('invocation').get('module_args')
-        name = module_args.get('name')
-        self.callback._debug(f"GCP Compute Backend Service {name}")
-
-        return {
-            module_name: {
-                'state': 'absent',
-                'name': self._to_text(name),
-            }
-        }
+        return self._simple_name_rollback(module_name, result)
 
     @gcp_check_state_present
     def _gcp_compute_disk(self, module_name, result):
@@ -141,42 +123,33 @@ class GCPCleaner(CleanerBase):
     def _gcp_compute_external_vpn_gateway(self, module_name, result):
         pass
 
-    @not_supported
+    @gcp_check_state_present
     def _gcp_compute_firewall(self, module_name, result):
-        pass
+        return self._simple_name_rollback(module_name, result)
 
     @not_supported
     def _gcp_compute_forwarding_rule(self, module_name, result):
         pass
 
-    @not_supported
+    @gcp_check_state_present
     def _gcp_compute_global_address(self, module_name, result):
-        pass
+        return self._simple_name_rollback(module_name, result)
 
     @not_supported
     def _gcp_compute_global_forwarding_rule(self, module_name, result):
         pass
 
-    @not_supported
+    @gcp_check_state_present
     def _gcp_compute_health_check(self, module_name, result):
-        pass
+        return self._simple_name_rollback(module_name, result)
 
     @gcp_check_state_present
     def _gcp_compute_http_health_check(self, module_name, result):
-        module_args = result._result.get('invocation').get('module_args')
-        name = module_args.get('name')
-        self.callback._debug(f"GCP Compute HTTP/S Health Check {name}")
-
-        return {
-            module_name: {
-                'state': 'absent',
-                'name': self._to_text(name),
-            }
-        }
+        return self._simple_name_rollback(module_name, result)
 
     @gcp_check_state_present
     def _gcp_compute_https_health_check(self, module_name, result):
-        return self._gcp_compute_http_health_check(module_name, result)
+        return self._simple_name_rollback(module_name, result)
 
     @not_supported
     def _gcp_compute_image(self, module_name, result):
@@ -257,16 +230,7 @@ class GCPCleaner(CleanerBase):
 
     @gcp_check_state_present
     def _gcp_compute_instance_template(self, module_name, result):
-        module_args = result._result.get('invocation').get('module_args')
-        name = module_args.get('name')
-        self.callback._debug(f"GCP Compute Instance Template {name}")
-
-        return {
-            module_name: {
-                'state': 'absent',
-                'name': self._to_text(name),
-            }
-        }
+        return self._simple_name_rollback(module_name, result)
 
     @not_supported
     def _gcp_compute_interconnect_attachment(self, module_name, result):
@@ -274,56 +238,112 @@ class GCPCleaner(CleanerBase):
 
     @gcp_check_state_present
     def _gcp_compute_network(self, module_name, result):
-        module_args = result._result.get('invocation').get('module_args')
-        name = module_args.get('name')
-        #auto_create_subnets = module_args.get('auto_create_subnets')
-        self.callback._debug(f"GCP Compute Network {name}")
-
         # If subnets have been create automatically, they are also deleted
         # by the Ansible module
-
-        return {
-            module_name: {
-                'state': 'absent',
-                'name': self._to_text(name),
-            }
-        }
+        return self._simple_name_rollback(module_name, result)
 
     @not_supported
     def _gcp_compute_network_endpoint_group(self, module_name, result):
         pass
 
-    @not_supported
+    @gcp_check_state_present
     def _gcp_compute_node_group(self, module_name, result):
-        pass
+        module_args = result._result.get('invocation').get('module_args')
+        name = module_args.get('name')
+        zone = module_args.get('zone')
+        node_template = module_args.get('node_template')
+        self_link = node_template.get('selfLink')
+        size = module_args.get('size')
+        self.callback._debug(f"{module_name}: {name}")
 
-    @not_supported
+        return {
+            module_name: {
+                'state': 'absent',
+                'name': self._to_text(name),
+                'zone': self._to_text(zone),
+                'node_template': { 'selfLink': self._to_text(self_link) },
+                'size': self._to_text(size),
+            }
+        }
+
+    @gcp_check_state_present
     def _gcp_compute_node_template(self, module_name, result):
-        pass
+        return self._simple_name_rollback(module_name, result)
 
-    @not_supported
+    @gcp_check_state_present
     def _gcp_compute_region_autoscaler(self, module_name, result):
-        pass
+        module_args = result._result.get('invocation').get('module_args')
+        name = module_args.get('name')
+        region = module_args.get('region')
+        target = module_args.get('target')
+        #autoscaling_policy = module_args.get('autoscaling_policy')
+        self.callback._debug(f"GCP Compute Region Autoscaler {name}")
 
-    @not_supported
+        return {
+            module_name: {
+                'state': 'absent',
+                'name': self._to_text(name),
+                'region': self._to_text(region),
+                'target': self._to_text(target),
+                'autoscaling_policy': { 'max_num_replicas': 0 }    # autoscaling_policy, # why so ?
+            }
+        }
+
+    @gcp_check_state_present
     def _gcp_compute_region_backend_service(self, module_name, result):
-        pass
+        module_args = result._result.get('invocation').get('module_args')
+        name = module_args.get('name')
+        region = module_args.get('region')
+        self.callback._debug(f"GCP Compute Region Backend Service {name}")
 
-    @not_supported
+        return {
+            module_name: {
+                'state': 'absent',
+                'name': self._to_text(name),
+                'region': self._to_text(region),
+            }
+        }
+
+    @gcp_check_state_present
     def _gcp_compute_region_disk(self, module_name, result):
-        pass
+        module_args = result._result.get('invocation').get('module_args')
+        name = module_args.get('name')
+        region = module_args.get('region')
+        replica_zones = module_args.get('replica_zones')
+        self.callback._debug(f"GCP Compute Region Disk {name}")
 
-    @not_supported
+        return {
+            module_name: {
+                'state': 'absent',
+                'name': self._to_text(name),
+                'region': self._to_text(region),
+                'replica_zones': [self._to_text(rz) for rz in replica_zones],
+            }
+        }
+
+    @gcp_check_state_present
     def _gcp_compute_region_health_check(self, module_name, result):
-        pass
+        return self._simple_name_rollback(module_name, result)
 
-    @not_supported
-    def _gcp_compute_region_health_check_info(self, module_name, result):
-        pass
-
-    @not_supported
+    @gcp_check_state_present
     def _gcp_compute_region_instance_group_manager(self, module_name, result):
-        pass
+        module_args = result._result.get('invocation').get('module_args')
+        name = module_args.get('name')
+        region = module_args.get('region')
+        base_instance_name = module_args.get('base_instance_name')
+        instance_template = module_args.get('instance_template')
+        self_link = instance_template.get('selfLink')
+        self.callback._debug(f"GCP Compute Region Instance Group Manager {name}")
+
+        return {
+            module_name: {
+                'state': 'absent',
+                'name': self._to_text(name),
+                'region': self._to_text(region),
+                'base_instance_name': self._to_text(base_instance_name),
+                'instance_template': { 'selfLink': self._to_text(self_link) },
+            }
+        }
 
     @not_supported
     def _gcp_compute_region_target_http_proxy(self, module_name, result):
@@ -345,13 +365,41 @@ class GCPCleaner(CleanerBase):
     def _gcp_compute_resource_policy(self, module_name, result):
         pass
 
-    @not_supported
+    @gcp_check_state_present
     def _gcp_compute_route(self, module_name, result):
-        pass
+        module_args = result._result.get('invocation').get('module_args')
+        name = module_args.get('name')
+        dest_range = module_args.get('dest_range')
+        network = module_args.get('network')
+        self_link = network.get('selfLink')
+        self.callback._debug(f"GCP Compute Route {name}")
 
-    @not_supported
+        return {
+            module_name: {
+                'state': 'absent',
+                'name': self._to_text(name),
+                'dest_range': self._to_text(dest_range),
+                'network': { 'selfLink': self._to_text(self_link) },
+            }
+        }
+
+    @gcp_check_state_present
     def _gcp_compute_router(self, module_name, result):
-        pass
+        module_args = result._result.get('invocation').get('module_args')
+        name = module_args.get('name')
+        region = module_args.get('region')
+        network = module_args.get('network')
+        self_link = network.get('selfLink')
+        self.callback._debug(f"GCP Compute Router {name}")
+
+        return {
+            module_name: {
+                'state': 'absent',
+                'name': self._to_text(name),
+                'region': self._to_text(region),
+                'network': { 'selfLink': self._to_text(self_link) },
+            }
+        }
 
     @not_supported
     def _gcp_compute_snapshot(self, module_name, result):
@@ -446,17 +494,40 @@ class GCPCleaner(CleanerBase):
     def _gcp_filestore_instance(self, module_name, result):
         pass
 
-    @not_supported
+    @gcp_check_state_present
     def _gcp_iam_role(self, module_name, result):
-        pass
+        return self._simple_name_rollback(module_name, result)
 
-    @not_supported
+    @gcp_check_state_present
     def _gcp_iam_service_account(self, module_name, result):
-        pass
+        module_args = result._result.get('invocation').get('module_args')
+        #project = module_args.get('project')
+        name = result._result.get('name')
+        self.callback._debug(f"GCP IAM Service Account Key {name}")
+        #full_name = f"{name}@{project}.iam.gserviceaccount.com"
 
-    @not_supported
+        return {
+            module_name: {
+                'state': 'absent',
+                'name': self._to_text(name),
+            }
+        }
+
+    @gcp_check_state_present
     def _gcp_iam_service_account_key(self, module_name, result):
-        pass
+        module_args = result._result.get('invocation').get('module_args')
+        path = module_args.get('path')
+        #service_account = result._result.get('serviceAccount')
+        name = result._result.get('name')
+        self.callback._debug(f"GCP IAM Service Account Key {name}")
+
+        return {
+            module_name: {
+                'state': 'absent',
+                #'service_account': service_account,
+                'path': self._to_text(path),
+            }
+        }
 
     @not_supported
     def _gcp_kms_crypto_key(self, module_name, result):
@@ -540,16 +611,7 @@ class GCPCleaner(CleanerBase):
 
     @gcp_check_state_present
     def _gcp_storage_bucket(self, module_name, result):
-        module_args = result._result.get('invocation').get('module_args')
-        name = module_args.get('name')
-        self.callback._debug(f"GCP Storage Bucket {name}")
-
-        return {
-            module_name: {
-                'state': 'absent',
-                'name': self._to_text(name),
-            }
-        }
+        return self._simple_name_rollback(module_name, result)
 
     @not_supported
     def _gcp_storage_bucket_access_control(self, module_name, result):
@@ -566,6 +628,19 @@ class GCPCleaner(CleanerBase):
     @not_supported
     def _gcp_tpu_node(self, module_name, result):
         pass
+
+    # Simple rollback base on object name only
+    def _simple_name_rollback(self, module_name, result):
+        module_args = result._result.get('invocation').get('module_args')
+        name = module_args.get('name')
+        self.callback._debug(f"{module_name}: {name}")
+
+        return {
+            module_name: {
+                'state': 'absent',
+                'name': self._to_text(name),
+            }
+        }
 
     # @override
     def _generate_actions(self, actions, module_name, result):

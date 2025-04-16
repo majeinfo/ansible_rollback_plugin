@@ -1,0 +1,37 @@
+- name: Create a router
+  hosts: localhost
+  connection: local
+  gather_facts: False
+  vars_files:
+    - vars.yml
+
+  vars:
+    network_name: rollback-network
+
+  tasks:
+    - name: Create a network
+      google.cloud.gcp_compute_network:
+        name: "{{ network_name }}"
+        auto_create_subnetworks: false
+        project: "{{ gcp_project }}"
+        auth_kind: serviceaccount
+        state: present
+      register: network
+
+    - name: Create a router
+      google.cloud.gcp_compute_router:
+        name: rollback-router
+        network: "{{ network }}"
+        bgp:
+          asn: 64514
+          advertise_mode: CUSTOM
+          advertised_groups:
+            - ALL_SUBNETS
+          advertised_ip_ranges:
+            - range: 1.2.3.4
+            - range: 6.7.0.0/16
+        region: "{{ region }}"
+        project: "{{ gcp_project }}"
+        auth_kind: serviceaccount
+        state: present
+

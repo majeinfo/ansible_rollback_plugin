@@ -1,0 +1,21 @@
+- name: Create a region disk
+  hosts: localhost
+  connection: local
+  gather_facts: False
+  vars_files:
+    - vars.yml
+
+  tasks:
+    - name: Create a region disk
+      google.cloud.gcp_compute_region_disk:
+        name: rollback-region-disk
+        size_gb: 200
+        region: "{{ region }}"
+        replica_zones:
+          - https://www.googleapis.com/compute/v1/projects/google.com:graphite-playground/zones/{{ region }}-a
+          - https://www.googleapis.com/compute/v1/projects/google.com:graphite-playground/zones/{{ region }}-b
+        project: "{{ gcp_project }}"
+        auth_kind: serviceaccount
+        state: present
+
+

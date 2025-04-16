@@ -1,0 +1,34 @@
+- name: Create Health Check and Region Health Check
+  hosts: localhost
+  connection: local
+  gather_facts: False
+  vars_files:
+    - vars.yml
+
+  tasks:
+    - name: Create a health check
+      google.cloud.gcp_compute_health_check:
+        name: rollback-healthcheck
+        type: TCP
+        tcp_health_check:
+          port: 443
+        healthy_threshold: 10
+        timeout_sec: 2
+        unhealthy_threshold: 5
+        project: "{{ gcp_project }}"
+        auth_kind: serviceaccount
+        state: present
+
+    - name: Create a region health check
+      google.cloud.gcp_compute_region_health_check:
+        name: rollback-region-healthcheck
+        type: TCP
+        tcp_health_check:
+          port: 443
+        healthy_threshold: 10
+        timeout_sec: 2
+        unhealthy_threshold: 5
+        region: us-central1
+        project: "{{ gcp_project }}"
+        auth_kind: serviceaccount
+        state: present

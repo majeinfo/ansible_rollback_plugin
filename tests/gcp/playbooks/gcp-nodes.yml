@@ -1,0 +1,32 @@
+- name: Create an Node Group
+  hosts: localhost
+  connection: local
+  gather_facts: False
+  vars_files:
+    - vars.yml
+
+  vars:
+    node_template: rollback-node-template
+    node_group: rollback-node-group
+
+  tasks:
+    - name: Create a node template
+      google.cloud.gcp_compute_node_template:
+        name: "{{ node_template }}"
+        region: "{{ region }}"
+        node_type: n2-node-80-640
+        project: "{{ gcp_project }}"
+        auth_kind: serviceaccount
+        state: present
+      register: node_template
+
+    - name: Create a node group
+      google.cloud.gcp_compute_node_group:
+        name: "{{ node_group }}"
+        zone: "{{ region }}-a"
+        description: example group for ansible rollback
+        size: 0
+        node_template: "{{ node_template }}"
+        project: "{{ gcp_project }}"
+        auth_kind: serviceaccount
+        state: present
