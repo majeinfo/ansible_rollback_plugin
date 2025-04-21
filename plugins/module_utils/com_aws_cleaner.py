@@ -13,6 +13,10 @@ class CommunityAWSCleaner(CleanerBase):
     def get_collection_prefix(self):
         return "community.aws"
 
+    @check_state_present
+    def _sns_topic(self, module_name, result):
+        return self._simple_name_rollback(module_name, result)
+
     # @override
     def _generate_actions(self, actions, module_name, result):
         '''

@@ -613,19 +613,6 @@ class GCPCleaner(CleanerBase):
     def _gcp_tpu_node(self, module_name, result):
         pass
 
-    # Simple rollback base on object name only
-    def _simple_name_rollback(self, module_name, result):
-        module_args = result._result.get('invocation').get('module_args')
-        name = module_args.get('name')
-        self.callback._debug(f"{module_name}: {name}")
-
-        return {
-            module_name: {
-                'state': 'absent',
-                'name': self._to_text(name),
-            }
-        }
-
     # @override
     def _generate_actions(self, actions, module_name, result):
         '''

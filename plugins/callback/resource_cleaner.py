@@ -94,7 +94,8 @@ class CallbackModule(CallbackBase):
 
         # List of handled Cloud providers
         self.providers = {
-            'amazon.aws': AWSCleaner(self),
+            'amazon.aws': AmazonAWSCleaner(self),
+            'community.aws': CommunityAWSCleaner(self),
             'google.cloud': GCPCleaner(self),
         }
 

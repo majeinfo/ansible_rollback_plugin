@@ -1,0 +1,38 @@
+- name: Test SNS Topic creation
+  hosts: localhost
+  connection: local
+  gather_facts: False
+  vars_files:
+    - vars.yml
+
+  vars:
+    sns_name: rollback-sns
+
+  tasks:
+    - name: Create alarm SNS topic
+      community.aws.sns_topic:
+        name: "{{ sns_name }}"
+        state: present
+        display_name: "alarm SNS topic"
+        delivery_policy:
+          http:
+            defaultHealthyRetryPolicy:
+              minDelayTarget: 2
+              maxDelayTarget: 4
+              numRetries: 9
+              numMaxDelayRetries: 5
+              numMinDelayRetries: 2
+              numNoDelayRetries: 2
+              backoffFunction: "linear"
+            disableSubscriptionOverrides: true
+            defaultThrottlePolicy:
+              maxReceivesPerSecond: 10
+#        subscriptions:
+#          - endpoint: "my_email_address@example.com"
+#            protocol: "email"
+#          - endpoint: "my_mobile_number"
+#            protocol: "sms"
+
+
+
+

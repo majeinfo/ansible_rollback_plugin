@@ -55,6 +55,19 @@ class CleanerBase(ABC):
             }
         }
 
+    # Simple rollback base on object name only
+    def _simple_name_rollback(self, module_name, result):
+        module_args = result._result.get('invocation').get('module_args')
+        name = module_args.get('name')
+        self.callback._debug(f"{module_name}: {name}")
+
+        return {
+            module_name: {
+                'state': 'absent',
+                'name': self._to_text(name),
+            }
+        }
+
     # Convert AnsibleUnsafeText into a real str (needed for the YAML dumper)
     def _to_text(self, value):
         return super(type(value), value).__str__()
