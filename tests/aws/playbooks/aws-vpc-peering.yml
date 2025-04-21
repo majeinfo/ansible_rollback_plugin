@@ -1,0 +1,42 @@
+- name: Test VPC peering
+  hosts: localhost
+  connection: local
+  gather_facts: False
+  vars_files:
+    - vars.yml
+
+  vars:
+    vpc_name: rollback-vpc1
+    vpc_peer_name: rollback-vpc2
+
+  tasks:
+    - name: Create a VPC
+      amazon.aws.ec2_vpc_net:
+        name: "{{ vpc_name }}"
+        cidr_block: "10.10.0.0/16"
+        region: "{{ region }}"
+      register: vpc
+
+    - name: Create a Peer VPC
+      amazon.aws.ec2_vpc_net:
+        name: "{{ vpc_peer_name }}"
+        cidr_block: "10.11.0.0/16"
+        region: "{{ region }}"
+      register: vpc_peer
+
+    - name: Create PC Peering Connection
+      amazon.aws.ec2_vpc_peering:
+        region: "{{ region }}"
+        vpc_id: "{{ vpc.vpc.id }}"
+        peer_vpc_id: "{{ vpc_peer.vpc.id }}"
+        state: "present"
+        tags:
+          Name: "Rollback Peering connection for VPC1 to VPC2"
+      register: vpc_peer
+
+    - name: Accept VPC Peering request
+      amazon.aws.ec2_vpc_peering:
+        region: "{{ region }}"
+        peering_id: "{{ vpc_peer.peering_id }}"
+        state: "accept"
+      register: action_peer

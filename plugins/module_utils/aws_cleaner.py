@@ -98,42 +98,15 @@ class AWSCleaner(CleanerBase):
 
     @aws_check_state_present
     def _cloudtrail(self, module_name, result):
-        module_args = result._result.get('invocation').get('module_args')
-        name = module_args.get('name')
-        self.callback._debug(f"created Cloudtrail: {name}")
-
-        return {
-            module_name: {
-                'state': 'absent',
-                'name': self._to_text(name),
-            }
-        }
+        return self._simple_name_rollback(module_name, result)
 
     @aws_check_state_present
     def _cloudwatch_metric_alarm(self, module_name, result):
-        module_args = result._result.get('invocation').get('module_args')
-        name = module_args.get('name')
-        self.callback._debug(f"created Cloudwatch Alarm: {name}")
-
-        return {
-            module_name: {
-                'state': 'absent',
-                'name': self._to_text(name),
-            }
-        }
+        return self._simple_name_rollback(module_name, result)
 
     @aws_check_state_present
     def _cloudwatchevent_rule(self, module_name, result):
-        module_args = result._result.get('invocation').get('module_args')
-        name = module_args.get('name')
-        self.callback._debug(f"created Cloudwatch Event Rule: {name}")
-
-        return {
-            module_name: {
-                'state': 'absent',
-                'name': self._to_text(name),
-            }
-        }
+        return self._simple_name_rollback(module_name, result)
 
     @aws_check_state_present
     def _cloudwatchlogs_log_group(self, module_name, result):
@@ -439,7 +412,6 @@ class AWSCleaner(CleanerBase):
 
         return actions
 
-    @not_supported
     @aws_check_state_present
     def _ec2_vpc_net(self, module_name, result):
         vpc = result._result.get('vpc')
@@ -453,9 +425,17 @@ class AWSCleaner(CleanerBase):
             }
         }
 
-    @not_supported
+    @aws_check_state_present
     def _ec2_vpc_peering(self, module_name, result):
-        pass
+        peering_id = result._result.get('peering_id')
+        self.callback._debug(f"VPC Peering {peering_id}")
+
+        return {
+            module_name: {
+                'state': 'absent',
+                'peering_id': self._to_text(peering_id),
+            }
+        }
 
     @aws_check_state_present
     def _ec2_vpc_route_table(self, module_name, result):
@@ -539,29 +519,11 @@ class AWSCleaner(CleanerBase):
 
     @aws_check_state_present
     def _iam_group(self, module_name, result):
-        module_args = result._result.get('invocation').get('module_args')
-        name = module_args.get('name')
-        self.callback._debug(f"IAM Group {name}")
-
-        return {
-            module_name: {
-                'state': 'absent',
-                'name': self._to_text(name),
-            }
-        }
+        return self._simple_name_rollback(module_name, result)
 
     @aws_check_state_present
     def _iam_instance_profile(self, module_name, result):
-        module_args = result._result.get('invocation').get('module_args')
-        name = module_args.get('name')
-        self.callback._debug(f"IAM Instance Profile {name}")
-
-        return {
-            module_name: {
-                'state': 'absent',
-                'name': self._to_text(name),
-            }
-        }
+        return self._simple_name_rollback(module_name, result)
 
     @aws_check_state_present
     def _iam_managed_policy(self, module_name, result):
@@ -601,29 +563,11 @@ class AWSCleaner(CleanerBase):
 
     @aws_check_state_present
     def _iam_role(self, module_name, result):
-        module_args = result._result.get('invocation').get('module_args')
-        name = module_args.get('name')
-        self.callback._debug(f"IAM Role {name}")
-
-        return {
-            module_name: {
-                'state': 'absent',
-                'name': self._to_text(name),
-            }
-        }
+        return self._simple_name_rollback(module_name, result)
 
     @aws_check_state_present
     def _iam_user(self, module_name, result):
-        module_args = result._result.get('invocation').get('module_args')
-        name = module_args.get('name')
-        self.callback._debug(f"IAM User {name}")
-
-        return {
-            module_name: {
-                'state': 'absent',
-                'name': self._to_text(name),
-            }
-        }
+        return self._simple_name_rollback(module_name, result)
 
     @aws_check_state_present
     def _kms_key(self, module_name, result):
@@ -640,16 +584,7 @@ class AWSCleaner(CleanerBase):
 
     @aws_check_state_present
     def _lambda(self, module_name, result):
-        module_args = result._result.get('invocation').get('module_args')
-        name = module_args.get('name')
-        self.callback._debug(f"Lambda Function {name}")
-
-        return {
-            module_name: {
-                'state': 'absent',
-                'name': self._to_text(name),
-            }
-        }
+        return self._simple_name_rollback(module_name, result)
 
     @aws_check_state_present
     def _lambda_alias(self, module_name, result):
@@ -699,41 +634,125 @@ class AWSCleaner(CleanerBase):
 
         username = module_args.get('password')
         password = module_args.get('password')
+        engine = module_args.get('engine')
+        deletion_protection = module_args.get('deletion_protection')
         self.callback._debug(f"RDS Cluster {cluster_name}")
+
+        # if engine not set but deletion_protection is set, this is a rollback action:
+        # nothing to rollback !
+        if not engine and not deletion_protection:
+            return None
+
+        actions = [{
+            module_name: {
+                'state': 'absent',
+                'cluster_name': self._to_text(cluster_name),
+                'skip_final_snapshot': True,
+            }
+        }]
+
+        if deletion_protection:
+            protect_off = {
+                module_name: {
+                    'state': 'present',
+                    'cluster_name': self._to_text(cluster_name),
+                    'deletion_protection': False,
+                }
+            }
+            actions.insert(0, protect_off)
+
+        return actions
+
+    @aws_check_state_present
+    def _rds_cluster_param_group(self, module_name, result):
+        return self._simple_name_rollback(module_name, result)
+
+    @aws_check_state_present
+    def _rds_cluster_snapshot(self, module_name, result):
+        module_args = result._result.get('invocation').get('module_args')
+        for parm in ('instance_id', 'id', 'db_cluster_snapshot_identifier', 'snapshot_name'):
+            db_cluster_snapshot_identifier = module_args.get(parm)
+            if db_cluster_snapshot_identifier: break
+
+        self.callback._debug(f"RDS Cluster Snapshot {db_cluster_snapshot_identifier}")
 
         return {
             module_name: {
                 'state': 'absent',
-                'cluster_name': self._to_text(cluster_name),
-                'username': self._to_text(username),
-                'password': self._to_text(password),
-                'skip_final_snapshot': True,
+                'db_cluster_snapshot_identifier': self._to_text(db_cluster_snapshot_identifier),
             }
         }
 
-    @not_supported
-    def _rds_cluster_param_group(self, module_name, result):
-        pass
-
-    @not_supported
-    def _rds_cluster_snapshot(self, module_name, result):
-        pass
-
-    @not_supported
+    @aws_check_state_present
     def _rds_instance(self, module_name, result):
-        pass
+        module_args = result._result.get('invocation').get('module_args')
+        for parm in ('instance_id', 'id', 'db_instance_identifier'):
+            instance_id = module_args.get(parm)
+            if instance_id: break
 
-    @not_supported
+        username = module_args.get('password')
+        password = module_args.get('password')
+        engine = module_args.get('engine')
+        deletion_protection = module_args.get('deletion_protection')
+        self.callback._debug(f"RDS Instance {instance_id}")
+
+        # if engine not set but deletion_protection is set, this is a rollback action:
+        # nothing to rollback !
+        if not engine and not deletion_protection:
+            return None
+
+        actions = [{
+            module_name: {
+                'state': 'absent',
+                'instance_id': self._to_text(instance_id),
+                'skip_final_snapshot': True,
+            }
+        }]
+
+        if deletion_protection:
+            protect_off = {
+                module_name: {
+                    'state': 'present',
+                    'instance_id': self._to_text(instance_id),
+                    'deletion_protection': False,
+                }
+            }
+            actions.insert(0, protect_off)
+
+        return actions
+
+    @aws_check_state_present
     def _rds_instance_param_group(self, module_name, result):
-        pass
+        return self._simple_name_rollback(module_name, result)
 
-    @not_supported
+    @aws_check_state_present
     def _rds_instance_snapshot(self, module_name, result):
-        pass
+        module_args = result._result.get('invocation').get('module_args')
+        for parm in ('instance_id', 'id', 'db_snapshot_identifier'):
+            db_snapshot_identifier = module_args.get(parm)
+            if db_snapshot_identifier: break
 
-    @not_supported
+        self.callback._debug(f"RDS Cluster Snapshot {db_snapshot_identifier}")
+
+        return {
+            module_name: {
+                'state': 'absent',
+                'db_snapshot_identifier': self._to_text(db_snapshot_identifier),
+            }
+        }
+
+    @aws_check_state_present
     def _rds_option_group(self, module_name, result):
-        pass
+        module_args = result._result.get('invocation').get('module_args')
+        option_group_name = module_args.get('option_group_name')
+        self.callback._debug(f"{module_name}: {option_group_name}")
+
+        return {
+            module_name: {
+                'state': 'absent',
+                'option_group_name': self._to_text(option_group_name),
+            }
+        }
 
     @aws_check_state_present
     def _route53(self, module_name, result):
@@ -814,6 +833,19 @@ class AWSCleaner(CleanerBase):
                     'bucket': self._to_text(bucket_name),
                 }
             }
+
+    # Simple rollback base on object name only
+    def _simple_name_rollback(self, module_name, result):
+        module_args = result._result.get('invocation').get('module_args')
+        name = module_args.get('name')
+        self.callback._debug(f"{module_name}: {name}")
+
+        return {
+            module_name: {
+                'state': 'absent',
+                'name': self._to_text(name),
+            }
+        }
 
     # @override
     def _generate_actions(self, actions, module_name, result):

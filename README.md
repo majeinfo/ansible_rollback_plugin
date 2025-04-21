@@ -3,12 +3,12 @@
 This collection installs a callback plugins that generates 
 rollback playbooks when a playbook generates dynamic resources in the Cloud.
 
-In this version, only some of AWS resources types are supported:
+In this version, a large part of AWS resources and some GCP resources types are supported:
 EC2 instance, VPC, VPC Subnet, TAG, AMI, Security Group, EIP, ENI, KEY, Volume
 (see the list of supported modules below)
 
 In order to enable this Callback Plugin, add the following parameters
-in your ansible.cfg file :
+in your `ansible.cfg` file :
 
 ```
 [defaults]
@@ -71,7 +71,7 @@ played to delete the resources previously created.
 | ```amazon.aws.ec2_vpc_nacl``` | ```Yes``` |
 | ```amazon.aws.ec2_vpc_nat_gateway``` | ```Yes``` |
 | ```amazon.aws.ec2_vpc_net``` | ```Yes``` |
-| ```amazon.aws.ec2_vpc_peering``` | ```No```  |
+| ```amazon.aws.ec2_vpc_peering``` | ```Yes``` |
 | ```amazon.aws.ec2_vpc_route_table``` | ```Yes``` |
 | ```amazon.aws.ec2_vpc_net``` | ```Yes``` |
 | ```amazon.aws.ec2_vpc_subnet``` | ```Yes``` |
@@ -94,12 +94,12 @@ played to delete the resources previously created.
 | ```amazon.aws.lambda_layer``` | ```Yes``` |
 | ```amazon.aws.lambda_policy``` | ```No```  |
 | ```amazon.aws.rds_cluster``` | ```Yes``` |
-| ```amazon.aws.rds_cluster_param_group``` | ```No```  |
-| ```amazon.aws.rds_cluster_snapshot``` | ```No```  |
-| ```amazon.aws.rds_instance``` | ```No```  |
-| ```amazon.aws.rds_instance_param_group``` | ```No```  |
-| ```amazon.aws.rds_instance_snapshot``` | ```No```  |
-| ```amazon.aws.rds_option_group``` | ```No```  |
+| ```amazon.aws.rds_cluster_param_group``` | ```Yes``` |
+| ```amazon.aws.rds_cluster_snapshot``` | ```Yes``` |
+| ```amazon.aws.rds_instance``` | ```Yes``` |
+| ```amazon.aws.rds_instance_param_group``` | ```Yes``` |
+| ```amazon.aws.rds_instance_snapshot``` | ```Yes``` |
+| ```amazon.aws.rds_option_group``` | ```Yes``` |
 | ```amazon.aws.route53``` | ```Yes``` |
 | ```amazon.aws.route53_key_signing_key``` | ```No```  |
 | ```amazon.aws.route53_zone``` | ```No```  |

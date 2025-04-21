@@ -1,0 +1,35 @@
+- name: Test RDS instance creation
+  hosts: localhost
+  connection: local
+  gather_facts: False
+  vars_files:
+    - vars.yml
+
+  vars:
+    rds_instance_name: rollback-rds-instance
+    rds_snapshot_name: rollback-rds-snapshot
+    instance_type: db.t3.medium
+    engine: mysql
+    engine_version: "8.0"
+    password: password
+    username: admin
+
+  tasks:
+    - name: Create MySQL instance in default VPC and default subnet group
+      amazon.aws.rds_instance:
+        #db_cluster_identifier: "{{ rds_cluster_name }}"
+        db_instance_identifier: "{{ rds_instance_name }}"
+        db_instance_class: "{{ instance_type }}"
+        engine: "{{ engine }}"
+        engine_version: "{{ engine_version }}"
+        master_user_password: "{{ password }}"
+        master_username: "{{ username }}"
+        allocated_storage: 40
+        region: "{{ region }}"
+      #no_log: true
+
+    - name: Create snapshot
+      amazon.aws.rds_instance_snapshot:
+        db_instance_identifier: "{{ rds_instance_name }}"
+        db_snapshot_identifier: "{{ rds_snapshot_name }}"
+        region: "{{ region }}"
