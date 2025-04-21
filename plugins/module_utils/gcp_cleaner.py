@@ -1,24 +1,8 @@
 # Driver for GCP Resources
 
 import sys
-from .cleaner_base import CleanerBase, not_supported
+from .cleaner_base import CleanerBase, not_supported, check_state_present
 
-
-def gcp_check_state_present(func):
-    '''
-    Decorator that ensures the resource is created.
-    There is no rollback to do if the resource is not created !
-    '''
-    def _check_state_present(self, module_name, result):
-        module_args = result._result.get('invocation').get('module_args')
-        state = module_args.get('state')
-        if state != 'present':
-            self.callback._debug(f"module {module_name} does not create any new resource")
-            return None
-
-        return func(self, module_name, result)
-
-    return _check_state_present
 
 class GCPCleaner(CleanerBase):
     def __init__(self, callback):
@@ -61,11 +45,11 @@ class GCPCleaner(CleanerBase):
     def _gcp_cloudtasks_queue(self, module_name, result):
         pass
 
-    @gcp_check_state_present
+    @check_state_present
     def _gcp_compute_address(self, module_name, result):
         return self._simple_name_rollback(module_name, result)
 
-    @gcp_check_state_present
+    @check_state_present
     def _gcp_compute_autoscaler(self, module_name, result):
         module_args = result._result.get('invocation').get('module_args')
         name = module_args.get('name')
@@ -85,7 +69,7 @@ class GCPCleaner(CleanerBase):
             }
         }
 
-    @gcp_check_state_present
+    @check_state_present
     def _gcp_compute_backend_bucket(self, module_name, result):
         module_args = result._result.get('invocation').get('module_args')
         name = module_args.get('name')
@@ -100,11 +84,11 @@ class GCPCleaner(CleanerBase):
             }
         }
 
-    @gcp_check_state_present
+    @check_state_present
     def _gcp_compute_backend_service(self, module_name, result):
         return self._simple_name_rollback(module_name, result)
 
-    @gcp_check_state_present
+    @check_state_present
     def _gcp_compute_disk(self, module_name, result):
         module_args = result._result.get('invocation').get('module_args')
         name = module_args.get('name')
@@ -123,7 +107,7 @@ class GCPCleaner(CleanerBase):
     def _gcp_compute_external_vpn_gateway(self, module_name, result):
         pass
 
-    @gcp_check_state_present
+    @check_state_present
     def _gcp_compute_firewall(self, module_name, result):
         return self._simple_name_rollback(module_name, result)
 
@@ -131,7 +115,7 @@ class GCPCleaner(CleanerBase):
     def _gcp_compute_forwarding_rule(self, module_name, result):
         pass
 
-    @gcp_check_state_present
+    @check_state_present
     def _gcp_compute_global_address(self, module_name, result):
         return self._simple_name_rollback(module_name, result)
 
@@ -139,15 +123,15 @@ class GCPCleaner(CleanerBase):
     def _gcp_compute_global_forwarding_rule(self, module_name, result):
         pass
 
-    @gcp_check_state_present
+    @check_state_present
     def _gcp_compute_health_check(self, module_name, result):
         return self._simple_name_rollback(module_name, result)
 
-    @gcp_check_state_present
+    @check_state_present
     def _gcp_compute_http_health_check(self, module_name, result):
         return self._simple_name_rollback(module_name, result)
 
-    @gcp_check_state_present
+    @check_state_present
     def _gcp_compute_https_health_check(self, module_name, result):
         return self._simple_name_rollback(module_name, result)
 
@@ -155,7 +139,7 @@ class GCPCleaner(CleanerBase):
     def _gcp_compute_image(self, module_name, result):
         pass
 
-    @gcp_check_state_present
+    @check_state_present
     def _gcp_compute_instance(self, module_name, result):
         module_args = result._result.get('invocation').get('module_args')
         name = module_args.get('name')
@@ -193,7 +177,7 @@ class GCPCleaner(CleanerBase):
         return actions
 
 
-    @gcp_check_state_present
+    @check_state_present
     def _gcp_compute_instance_group(self, module_name, result):
         module_args = result._result.get('invocation').get('module_args')
         name = module_args.get('name')
@@ -208,7 +192,7 @@ class GCPCleaner(CleanerBase):
             }
         }
 
-    @gcp_check_state_present
+    @check_state_present
     def _gcp_compute_instance_group_manager(self, module_name, result):
         module_args = result._result.get('invocation').get('module_args')
         name = module_args.get('name')
@@ -228,7 +212,7 @@ class GCPCleaner(CleanerBase):
             }
         }
 
-    @gcp_check_state_present
+    @check_state_present
     def _gcp_compute_instance_template(self, module_name, result):
         return self._simple_name_rollback(module_name, result)
 
@@ -236,7 +220,7 @@ class GCPCleaner(CleanerBase):
     def _gcp_compute_interconnect_attachment(self, module_name, result):
         pass
 
-    @gcp_check_state_present
+    @check_state_present
     def _gcp_compute_network(self, module_name, result):
         # If subnets have been create automatically, they are also deleted
         # by the Ansible module
@@ -246,7 +230,7 @@ class GCPCleaner(CleanerBase):
     def _gcp_compute_network_endpoint_group(self, module_name, result):
         pass
 
-    @gcp_check_state_present
+    @check_state_present
     def _gcp_compute_node_group(self, module_name, result):
         module_args = result._result.get('invocation').get('module_args')
         name = module_args.get('name')
@@ -266,11 +250,11 @@ class GCPCleaner(CleanerBase):
             }
         }
 
-    @gcp_check_state_present
+    @check_state_present
     def _gcp_compute_node_template(self, module_name, result):
         return self._simple_name_rollback(module_name, result)
 
-    @gcp_check_state_present
+    @check_state_present
     def _gcp_compute_region_autoscaler(self, module_name, result):
         module_args = result._result.get('invocation').get('module_args')
         name = module_args.get('name')
@@ -289,7 +273,7 @@ class GCPCleaner(CleanerBase):
             }
         }
 
-    @gcp_check_state_present
+    @check_state_present
     def _gcp_compute_region_backend_service(self, module_name, result):
         module_args = result._result.get('invocation').get('module_args')
         name = module_args.get('name')
@@ -304,7 +288,7 @@ class GCPCleaner(CleanerBase):
             }
         }
 
-    @gcp_check_state_present
+    @check_state_present
     def _gcp_compute_region_disk(self, module_name, result):
         module_args = result._result.get('invocation').get('module_args')
         name = module_args.get('name')
@@ -321,11 +305,11 @@ class GCPCleaner(CleanerBase):
             }
         }
 
-    @gcp_check_state_present
+    @check_state_present
     def _gcp_compute_region_health_check(self, module_name, result):
         return self._simple_name_rollback(module_name, result)
 
-    @gcp_check_state_present
+    @check_state_present
     def _gcp_compute_region_instance_group_manager(self, module_name, result):
         module_args = result._result.get('invocation').get('module_args')
         name = module_args.get('name')
@@ -365,7 +349,7 @@ class GCPCleaner(CleanerBase):
     def _gcp_compute_resource_policy(self, module_name, result):
         pass
 
-    @gcp_check_state_present
+    @check_state_present
     def _gcp_compute_route(self, module_name, result):
         module_args = result._result.get('invocation').get('module_args')
         name = module_args.get('name')
@@ -383,7 +367,7 @@ class GCPCleaner(CleanerBase):
             }
         }
 
-    @gcp_check_state_present
+    @check_state_present
     def _gcp_compute_router(self, module_name, result):
         module_args = result._result.get('invocation').get('module_args')
         name = module_args.get('name')
@@ -413,7 +397,7 @@ class GCPCleaner(CleanerBase):
     def _gcp_compute_ssl_policy(self, module_name, result):
         pass
 
-    @gcp_check_state_present
+    @check_state_present
     def _gcp_compute_subnetwork(self, module_name, result):
         module_args = result._result.get('invocation').get('module_args')
         name = module_args.get('name')
@@ -494,11 +478,11 @@ class GCPCleaner(CleanerBase):
     def _gcp_filestore_instance(self, module_name, result):
         pass
 
-    @gcp_check_state_present
+    @check_state_present
     def _gcp_iam_role(self, module_name, result):
         return self._simple_name_rollback(module_name, result)
 
-    @gcp_check_state_present
+    @check_state_present
     def _gcp_iam_service_account(self, module_name, result):
         module_args = result._result.get('invocation').get('module_args')
         #project = module_args.get('project')
@@ -513,7 +497,7 @@ class GCPCleaner(CleanerBase):
             }
         }
 
-    @gcp_check_state_present
+    @check_state_present
     def _gcp_iam_service_account_key(self, module_name, result):
         module_args = result._result.get('invocation').get('module_args')
         path = module_args.get('path')
@@ -609,7 +593,7 @@ class GCPCleaner(CleanerBase):
     def _gcp_sql_user(self, module_name, result):
         pass
 
-    @gcp_check_state_present
+    @check_state_present
     def _gcp_storage_bucket(self, module_name, result):
         return self._simple_name_rollback(module_name, result)
 

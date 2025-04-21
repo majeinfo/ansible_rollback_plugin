@@ -1,36 +1,18 @@
 # Driver for AWS Resources
 
 import sys
-from .cleaner_base import CleanerBase, not_supported
+from .cleaner_base import CleanerBase, not_supported, check_state_present
 
-
-def aws_check_state_present(func):
-    '''
-    Decorator that ensures the resource is created.
-    There is no rollback to do if it is not !
-    '''
-    def _check_state_present(self, module_name, result):
-        module_args = result._result.get('invocation').get('module_args')
-        state = module_args.get('state')
-        if state != 'present':
-            self.callback._debug(f"module {module_name} does not create any new resource")
-            return None
-
-        return func(self, module_name, result)
-
-    return _check_state_present
-
-
-class AWSCleaner(CleanerBase):
+class AmazonAWSCleaner(CleanerBase):
     def __init__(self, callback):
         super().__init__(callback)
-        callback._debug("AWSCleaner __init__")
+        callback._debug("AmazonAWSCleaner __init__")
 
     # @abstractmethod
     def get_collection_prefix(self):
         return "amazon.aws"
 
-    @aws_check_state_present
+    @check_state_present
     def _autoscaling_group(self, module_name, result):
         module_args = result._result.get('invocation').get('module_args')
         name = module_args.get('name')
@@ -47,7 +29,7 @@ class AWSCleaner(CleanerBase):
     def _autoscaling_instance(self, module_name, result):
         pass
 
-    @aws_check_state_present
+    @check_state_present
     def _backup_plan(self, module_name, result):
         module_args = result._result.get('invocation').get('module_args')
         backup_plan_name = module_args.get('backup_plan_name')
@@ -60,7 +42,7 @@ class AWSCleaner(CleanerBase):
             }
         }
 
-    @aws_check_state_present
+    @check_state_present
     def _backup_selection(self, module_name, result):
         module_args = result._result.get('invocation').get('module_args')
         backup_plan_name = module_args.get('backup_plan_name')
@@ -79,7 +61,7 @@ class AWSCleaner(CleanerBase):
     def _backup_tag(self, module_name, result):
         pass
 
-    @aws_check_state_present
+    @check_state_present
     def _backup_vault(self, module_name, result):
         module_args = result._result.get('invocation').get('module_args')
         backup_vault_name = module_args.get('backup_vault_name')
@@ -96,19 +78,19 @@ class AWSCleaner(CleanerBase):
     def _cloudformation(self, module_name, result):
         pass
 
-    @aws_check_state_present
+    @check_state_present
     def _cloudtrail(self, module_name, result):
         return self._simple_name_rollback(module_name, result)
 
-    @aws_check_state_present
+    @check_state_present
     def _cloudwatch_metric_alarm(self, module_name, result):
         return self._simple_name_rollback(module_name, result)
 
-    @aws_check_state_present
+    @check_state_present
     def _cloudwatchevent_rule(self, module_name, result):
         return self._simple_name_rollback(module_name, result)
 
-    @aws_check_state_present
+    @check_state_present
     def _cloudwatchlogs_log_group(self, module_name, result):
         module_args = result._result.get('invocation').get('module_args')
         log_group_name = module_args.get('log_group_name')
@@ -121,7 +103,7 @@ class AWSCleaner(CleanerBase):
             }
         }
 
-    @aws_check_state_present
+    @check_state_present
     def _ec2_ami(self, module_name, result):
         image_id = result._result.get('image_id')
         self.callback._debug(f"created AMI: {image_id}")
@@ -133,7 +115,7 @@ class AWSCleaner(CleanerBase):
             }
         }
 
-    @aws_check_state_present
+    @check_state_present
     def _ec2_eip(self, module_name, result):
         module_args = result._result.get('invocation').get('module_args')
         in_vpc = module_args.get('in_vpc')
@@ -154,7 +136,7 @@ class AWSCleaner(CleanerBase):
             }
         }
 
-    @aws_check_state_present
+    @check_state_present
     def _ec2_eni(self, module_name, result):
         interface = result._result.get('interface')
         eni_id = interface.get('id')
@@ -167,7 +149,7 @@ class AWSCleaner(CleanerBase):
             }
         }
   
-    @aws_check_state_present
+    @check_state_present
     def _ec2_key(self, module_name, result):
         key = result._result.get('key')
         key_id = key.get('id')
@@ -181,7 +163,7 @@ class AWSCleaner(CleanerBase):
             }
         }
 
-    # Do not put the @aws_check_state_present !
+    # Do not put the @check_state_present !
     def _ec2_instance(self, module_name, result):
         module_args = result._result.get('invocation').get('module_args')
         state = module_args.get('state')
@@ -218,7 +200,7 @@ class AWSCleaner(CleanerBase):
 
         return actions
 
-    @aws_check_state_present
+    @check_state_present
     def _ec2_launch_template(self, module_name, result):
         template = result._result.get('template')
         template_name = template.get('launch_template_name')
@@ -231,7 +213,7 @@ class AWSCleaner(CleanerBase):
             }
         }
 
-    @aws_check_state_present
+    @check_state_present
     def _ec2_placement_group(self, module_name, result):
         placement_group = result._result.get('placement_group')
         name = placement_group.get('name')
@@ -244,7 +226,7 @@ class AWSCleaner(CleanerBase):
             }
         }
 
-    @aws_check_state_present
+    @check_state_present
     def _ec2_security_group(self, module_name, result):
         group_id = result._result.get('group_id')
         self.callback._debug(f"security_group {group_id}")
@@ -256,7 +238,7 @@ class AWSCleaner(CleanerBase):
             }
         }
 
-    @aws_check_state_present
+    @check_state_present
     def _ec2_snapshot(self, module_name, result):
         snapshot_id = result._result.get('snapshot_id')
         self.callback._debug(f"snapshot {snapshot_id}")
@@ -268,7 +250,7 @@ class AWSCleaner(CleanerBase):
             }
         }
 
-    @aws_check_state_present
+    @check_state_present
     def _ec2_spot_instance(self, module_name, result):
         spot_request = result._result.get('spot_request')
         spot_instance_request_id = spot_request.get('spot_instance_request_id')
@@ -281,7 +263,7 @@ class AWSCleaner(CleanerBase):
             }
         }
 
-    @aws_check_state_present
+    @check_state_present
     def _ec2_tag(self, module_name, result):
         module_args = result._result.get('invocation').get('module_args')
         resource = module_args.get('resource')
@@ -305,7 +287,7 @@ class AWSCleaner(CleanerBase):
     def _ec2_transit_gateway_vpc_attachment(self, module_name, result):
         pass
 
-    @aws_check_state_present
+    @check_state_present
     def _ec2_vol(self, module_name, result):
         volume = result._result.get('volume')
         volume_id = volume.get('id')
@@ -318,7 +300,7 @@ class AWSCleaner(CleanerBase):
             }
         }
 
-    @aws_check_state_present
+    @check_state_present
     def _ec2_vpc_dhcp_option(self, module_name, result):
         dhcp_options_id = result._result.get('dhcp_options_id')
         self.callback._debug(f"dhcp options {dhcp_options_id}")
@@ -334,7 +316,7 @@ class AWSCleaner(CleanerBase):
     def _ec2_vpc_egress_igw(self, module_name, result):
         pass
 
-    @aws_check_state_present
+    @check_state_present
     def _ec2_vpc_endpoint(self, module_name, result):
         vpc_endpoint_id = result._result.get('result').get('vpc_endpoint_id')
         self.callback._debug(f"vpc endpoint {vpc_endpoint_id}")
@@ -346,7 +328,7 @@ class AWSCleaner(CleanerBase):
             }
         }
     
-    @aws_check_state_present
+    @check_state_present
     def _ec2_vpc_igw(self, module_name, result):
         gateway_id = result._result.get('gateway_id')
         vpc_id = result._result.get('vpc_id')
@@ -360,7 +342,7 @@ class AWSCleaner(CleanerBase):
             }
         }
     
-    @aws_check_state_present
+    @check_state_present
     def _ec2_vpc_nacl(self, module_name, result):
         nacl_id = result._result.get('nacl_id')
         self.callback._debug(f"vpc nacl {nacl_id}")
@@ -372,7 +354,7 @@ class AWSCleaner(CleanerBase):
             }
         }
 
-    @aws_check_state_present
+    @check_state_present
     def _ec2_vpc_nat_gateway(self, module_name, result):
         '''
         Deleting a NAT GW is more complex: it may be needed
@@ -412,7 +394,7 @@ class AWSCleaner(CleanerBase):
 
         return actions
 
-    @aws_check_state_present
+    @check_state_present
     def _ec2_vpc_net(self, module_name, result):
         vpc = result._result.get('vpc')
         vpc_id = vpc.get('id')
@@ -425,7 +407,7 @@ class AWSCleaner(CleanerBase):
             }
         }
 
-    @aws_check_state_present
+    @check_state_present
     def _ec2_vpc_peering(self, module_name, result):
         peering_id = result._result.get('peering_id')
         self.callback._debug(f"VPC Peering {peering_id}")
@@ -437,7 +419,7 @@ class AWSCleaner(CleanerBase):
             }
         }
 
-    @aws_check_state_present
+    @check_state_present
     def _ec2_vpc_route_table(self, module_name, result):
         route_table = result._result.get('route_table')
         route_table_id = route_table.get('route_table_id')
@@ -453,7 +435,7 @@ class AWSCleaner(CleanerBase):
         }
 
     @not_supported
-    @aws_check_state_present
+    @check_state_present
     def _ec2_vpc_subnet(self, module_name, result):
         subnet = result._result.get('subnet')
         subnet_id = self._to_text(subnet.get('id'))
@@ -477,7 +459,7 @@ class AWSCleaner(CleanerBase):
     def _ec2_vpc_vpn(self, module_name, result):
         pass
 
-    @aws_check_state_present
+    @check_state_present
     def _elb_application_lb(self, module_name, result):
         load_balancer_name = result._result.get('load_balancer_name')
 
@@ -489,7 +471,7 @@ class AWSCleaner(CleanerBase):
             }
         }
 
-    @aws_check_state_present
+    @check_state_present
     def _elb_classic_lb(self, module_name, result):
         load_balancer = result._result.get('load_balancer')
         load_balancer_name = load_balancer.get('load_balancer_name')
@@ -502,7 +484,7 @@ class AWSCleaner(CleanerBase):
             }
         }
 
-    @aws_check_state_present
+    @check_state_present
     def _iam_access_key(self, module_name, result):
         access_key = result._result.get('access_key')
         access_key_id = access_key.get('access_key_id')
@@ -517,15 +499,15 @@ class AWSCleaner(CleanerBase):
             }
         }
 
-    @aws_check_state_present
+    @check_state_present
     def _iam_group(self, module_name, result):
         return self._simple_name_rollback(module_name, result)
 
-    @aws_check_state_present
+    @check_state_present
     def _iam_instance_profile(self, module_name, result):
         return self._simple_name_rollback(module_name, result)
 
-    @aws_check_state_present
+    @check_state_present
     def _iam_managed_policy(self, module_name, result):
         policy = result._result.get('policy')
         policy_name = policy.get('policy_name')
@@ -545,7 +527,7 @@ class AWSCleaner(CleanerBase):
         '''
         pass
 
-    @aws_check_state_present
+    @check_state_present
     def _iam_policy(self, module_name, result):
         module_args = result._result.get('invocation').get('module_args')
         iam_type = module_args.get('iam_type')
@@ -561,15 +543,15 @@ class AWSCleaner(CleanerBase):
             }
         }
 
-    @aws_check_state_present
+    @check_state_present
     def _iam_role(self, module_name, result):
         return self._simple_name_rollback(module_name, result)
 
-    @aws_check_state_present
+    @check_state_present
     def _iam_user(self, module_name, result):
         return self._simple_name_rollback(module_name, result)
 
-    @aws_check_state_present
+    @check_state_present
     def _kms_key(self, module_name, result):
         module_args = result._result.get('invocation').get('module_args')
         alias = module_args.get('alias')
@@ -582,11 +564,11 @@ class AWSCleaner(CleanerBase):
             }
         }
 
-    @aws_check_state_present
+    @check_state_present
     def _lambda(self, module_name, result):
         return self._simple_name_rollback(module_name, result)
 
-    @aws_check_state_present
+    @check_state_present
     def _lambda_alias(self, module_name, result):
         module_args = result._result.get('invocation').get('module_args')
         name = module_args.get('name')
@@ -605,7 +587,7 @@ class AWSCleaner(CleanerBase):
     def _lambda_event(self, module_name, result):
         pass
 
-    @aws_check_state_present
+    @check_state_present
     def _lambda_layer(self, module_name, result):
         module_args = result._result.get('invocation').get('module_args')
         name = module_args.get('name')
@@ -625,7 +607,7 @@ class AWSCleaner(CleanerBase):
     def _lambda_policy(self, module_name, result):
         pass
 
-    @aws_check_state_present
+    @check_state_present
     def _rds_cluster(self, module_name, result):
         module_args = result._result.get('invocation').get('module_args')
         for parm in ('cluster_name', 'cluster_id', 'id', 'db_cluster_identifier'):
@@ -663,11 +645,11 @@ class AWSCleaner(CleanerBase):
 
         return actions
 
-    @aws_check_state_present
+    @check_state_present
     def _rds_cluster_param_group(self, module_name, result):
         return self._simple_name_rollback(module_name, result)
 
-    @aws_check_state_present
+    @check_state_present
     def _rds_cluster_snapshot(self, module_name, result):
         module_args = result._result.get('invocation').get('module_args')
         for parm in ('instance_id', 'id', 'db_cluster_snapshot_identifier', 'snapshot_name'):
@@ -683,7 +665,7 @@ class AWSCleaner(CleanerBase):
             }
         }
 
-    @aws_check_state_present
+    @check_state_present
     def _rds_instance(self, module_name, result):
         module_args = result._result.get('invocation').get('module_args')
         for parm in ('instance_id', 'id', 'db_instance_identifier'):
@@ -721,11 +703,11 @@ class AWSCleaner(CleanerBase):
 
         return actions
 
-    @aws_check_state_present
+    @check_state_present
     def _rds_instance_param_group(self, module_name, result):
         return self._simple_name_rollback(module_name, result)
 
-    @aws_check_state_present
+    @check_state_present
     def _rds_instance_snapshot(self, module_name, result):
         module_args = result._result.get('invocation').get('module_args')
         for parm in ('instance_id', 'id', 'db_snapshot_identifier'):
@@ -741,7 +723,7 @@ class AWSCleaner(CleanerBase):
             }
         }
 
-    @aws_check_state_present
+    @check_state_present
     def _rds_option_group(self, module_name, result):
         module_args = result._result.get('invocation').get('module_args')
         option_group_name = module_args.get('option_group_name')
@@ -754,7 +736,7 @@ class AWSCleaner(CleanerBase):
             }
         }
 
-    @aws_check_state_present
+    @check_state_present
     def _route53(self, module_name, result):
         module_args = result._result.get('invocation').get('module_args')
         zone = module_args.get('zone')
@@ -779,7 +761,7 @@ class AWSCleaner(CleanerBase):
     def _route53_zone(self, module_name, result):
         pass
 
-    @aws_check_state_present
+    @check_state_present
     def _s3_bucket(self, module_name, result):
         name = result._result.get('name')
         self.callback._debug(f"S3 bucket {name}")

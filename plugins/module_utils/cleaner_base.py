@@ -68,4 +68,21 @@ def not_supported(func):
 
     return _not_supported
 
+
+def check_state_present(func):
+    '''
+    Decorator that ensures the resource is created (state: present)
+    There is no rollback to do if it is not !
+    '''
+    def _check_state_present(self, module_name, result):
+        module_args = result._result.get('invocation').get('module_args')
+        state = module_args.get('state')
+        if state != 'present':
+            self.callback._debug(f"module {module_name} does not create any new resource")
+            return None
+
+        return func(self, module_name, result)
+
+    return _check_state_present
+
 # EOF

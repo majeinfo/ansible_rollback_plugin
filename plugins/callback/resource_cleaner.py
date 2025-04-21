@@ -61,7 +61,8 @@ if BASE_DIR not in sys.path:
     sys.path.insert(0, BASE_DIR)
 
 # Here, add other Cleaner (in the future)
-from plugins.module_utils.aws_cleaner import AWSCleaner
+from plugins.module_utils.amz_aws_cleaner import AmazonAWSCleaner
+from plugins.module_utils.com_aws_cleaner import CommunityAWSCleaner
 from plugins.module_utils.gcp_cleaner import GCPCleaner
 
 

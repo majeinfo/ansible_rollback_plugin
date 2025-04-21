@@ -4,3 +4,4 @@
 * implements new AWS modules
 * implements GCP modules
 * implements Azure modules
+* some rollback actions use the "present" value and are so considered to be rollbacked !
