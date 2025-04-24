@@ -1,0 +1,37 @@
+- name: Test SNS Topic creation
+  hosts: localhost
+  connection: local
+  gather_facts: False
+  vars_files:
+    - vars.yml
+
+  vars:
+    vpc_name: rollback-vpc
+    subnet_name: rollback-subnet
+    efs_name: rollback-efs
+
+  tasks:
+    - name: Create a VPC
+      amazon.aws.ec2_vpc_net:
+        name: "{{ vpc_name }}"
+        cidr_block: "10.10.0.0/16"
+        region: "{{ region }}"
+      register: vpc
+
+    - name: Create a Subnet
+      amazon.aws.ec2_vpc_subnet:
+        cidr: "10.10.1.0/24"
+        region: "{{ region }}"
+        vpc_id: "{{ vpc.vpc.id }}"
+        tags:
+          Name: "{{ subnet_name }}"
+      register: subnet
+
+    - name: EFS provisioning
+      community.aws.efs:
+        state: present
+        region: "{{ region }}"
+        name: "{{ efs_name }}"
+        targets:
+          - subnet_id: "{{ subnet.subnet.id }}"
+            #security_groups: ["sg-1a2b3c4d"]

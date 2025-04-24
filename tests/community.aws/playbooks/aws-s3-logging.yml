@@ -1,0 +1,44 @@
+- name: Test S3 Bucket creation with logging
+  hosts: localhost
+  connection: local
+  gather_facts: False
+  vars_files:
+    - vars.yml
+
+  tasks:
+    - name: Create a new S3 Bucket for Target
+      amazon.aws.s3_bucket:
+        name: "{{ s3_prefix }}-rollback-target"
+        state: present
+        region: "{{ region }}"
+        policy: >-
+          {
+            "Version": "2012-10-17",
+            "Statement": [
+              {
+                "Sid": "S3ServerAccessLogsPolicy",
+                "Effect": "Allow",
+                "Principal": {
+                  "Service": "logging.s3.amazonaws.com"
+                },
+                "Action": "s3:PutObject",
+                "Resource": "arn:aws:s3:::{{ s3_prefix }}-rollback-target/AWSLogs/{{ account_id }}/*"
+              }
+            ]
+          }        
+
+    - name: Create a new S3 Bucket
+      amazon.aws.s3_bucket:
+        name: "{{ s3_prefix }}-rollback-test"
+        state: present
+        region: "{{ region }}"
+
+    - name: Configure an s3 bucket logging
+      community.aws.s3_logging:
+        name: "{{ s3_prefix }}-rollback-test"
+        target_bucket: "{{ s3_prefix }}-rollback-target"
+        target_prefix: logs/mywebsite.com
+        state: present
+
+
+

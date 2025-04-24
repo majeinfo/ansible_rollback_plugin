@@ -1,0 +1,21 @@
+- name: Test S3 Bucket creation with website
+  hosts: localhost
+  connection: local
+  gather_facts: False
+  vars_files:
+    - vars.yml
+
+  tasks:
+    - name: Create a new S3 Bucket
+      amazon.aws.s3_bucket:
+        name: "{{ s3_prefix }}-rollback-test"
+        state: present
+        region: "{{ region }}"
+
+    - name: Configure an s3 bucket to redirect all requests to example.com
+      community.aws.s3_website:
+        name: "{{ s3_prefix }}-rollback-test"
+        redirect_all_requests: example.com
+        state: present
+
+

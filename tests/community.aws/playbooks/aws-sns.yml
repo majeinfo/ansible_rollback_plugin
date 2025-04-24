@@ -27,11 +27,7 @@
             disableSubscriptionOverrides: true
             defaultThrottlePolicy:
               maxReceivesPerSecond: 10
-#        subscriptions:
-#          - endpoint: "my_email_address@example.com"
-#            protocol: "email"
-#          - endpoint: "my_mobile_number"
-#            protocol: "sms"
+
 
 
 

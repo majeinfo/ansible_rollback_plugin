@@ -14,8 +14,43 @@ class CommunityAWSCleaner(CleanerBase):
         return "community.aws"
 
     @check_state_present
+    def _efs(self, module_name, result):
+        return self._simple_name_rollback(module_name, result)
+
+    @check_state_present
+    def _s3_lifecycle(self, module_name, result):
+        action = self._simple_name_rollback(module_name, result)
+        # status must also be enabled
+        module_args = result._result.get('invocation').get('module_args')
+        status = module_args.get('status')
+        if status != 'enabled':
+            return None
+
+        prefix = module_args.get('prefix')
+        action[module_name]['prefix'] = self._to_text(prefix)
+        return action
+
+    @check_state_present
+    def _s3_logging(self, module_name, result):
+        # TODO: needs S3 ACL support which are deprecated
+        return self._simple_name_rollback(module_name, result)
+
+    @check_state_present
+    def _s3_website(self, module_name, result):
+        return self._simple_name_rollback(module_name, result)
+
+    @check_state_present
     def _sns_topic(self, module_name, result):
         return self._simple_name_rollback(module_name, result)
+
+    @check_state_present
+    def _sqs_queue(self, module_name, result):
+        action = self._simple_name_rollback(module_name, result)
+        module_args = result._result.get('invocation').get('module_args')
+        queue_type = module_args.get('queue_type')
+        action[module_name]['queue_type'] = self._to_text(queue_type)
+
+        return action
 
     # @override
     def _generate_actions(self, actions, module_name, result):

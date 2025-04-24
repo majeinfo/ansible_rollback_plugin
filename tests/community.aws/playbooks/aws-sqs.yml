@@ -1,0 +1,31 @@
+- name: Test SQS creation
+  hosts: localhost
+  connection: local
+  gather_facts: False
+  vars_files:
+    - vars.yml
+
+  vars:
+    sqs_name: rollback-sqs
+    sqs_fifo: rollback-fifo
+
+  tasks:
+    - name: Create SQS queue
+      community.aws.sqs_queue:
+        state: present
+        name: "{{ sqs_name }}"
+        region: "{{ region }}"
+
+    - name: Create SQS queue
+      community.aws.sqs_queue:
+        state: present
+        name: "{{ sqs_fifo }}"
+        region: "{{ region }}"
+        queue_type: fifo
+        content_based_deduplication: true
+
+
+
+
+
+

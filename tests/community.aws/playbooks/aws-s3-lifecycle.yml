@@ -1,0 +1,26 @@
+- name: Test S3 Bucket creation with lifecycle
+  hosts: localhost
+  connection: local
+  gather_facts: False
+  vars_files:
+    - vars.yml
+
+  tasks:
+    - name: Create a new S3 Bucket
+      amazon.aws.s3_bucket:
+        name: "{{ s3_prefix }}-rollback-test"
+        state: present
+        region: "{{ region }}"
+
+    - name: Configure an s3 bucket logging
+      community.aws.s3_lifecycle:
+        name: "{{ s3_prefix }}-rollback-test"
+        expiration_days: 30
+        prefix: logs/
+        status: enabled
+        state: present
+        region: "{{ region }}"
+
+
+
+

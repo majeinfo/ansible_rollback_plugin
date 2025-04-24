@@ -19,7 +19,7 @@
     - name: Create a Subnet
       amazon.aws.ec2_vpc_subnet:
         cidr: "10.10.1.0/24"
-        region: "eu-west-3"
+        region: "{{ region }}"
         vpc_id: "{{ vpc.vpc.id }}"
         tags: 
           Name: rollback_subnet

@@ -434,7 +434,6 @@ class AmazonAWSCleaner(CleanerBase):
             }
         }
 
-    @not_supported
     @check_state_present
     def _ec2_vpc_subnet(self, module_name, result):
         subnet = result._result.get('subnet')
