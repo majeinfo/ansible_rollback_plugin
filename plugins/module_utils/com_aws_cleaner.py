@@ -14,7 +14,44 @@ class CommunityAWSCleaner(CleanerBase):
         return "community.aws"
 
     @check_state_present
+    def _dynamodb_table(self, module_name, result):
+        return self._simple_name_rollback(module_name, result)
+
+    @check_state_present
     def _efs(self, module_name, result):
+        return self._simple_name_rollback(module_name, result)
+
+    @check_state_present
+    def _elasticache(self, module_name, result):
+        return self._simple_name_rollback(module_name, result)
+
+    @check_state_present
+    def _elb_network_lb(self, module_name, result):
+        module_args = result._result.get('invocation').get('module_args')
+        deletion_protection = module_args.get('deletion_protection')
+        nlb_name = module_args.get('name')
+
+        actions = [self._simple_name_rollback(module_name, result)]
+
+        # Removing of deletion_protection is not easily supported
+        self._warning(f"Removing a NLB with deletion_protection set to True is not supported")
+        # if deletion_protection:
+        #     protect_off = {
+        #         module_name: {
+        #             'state': 'present',
+        #             'name': self._to_text(nlb_name),
+        #             'deletion_protection': False,
+        #         }
+        #     }
+        #     actions.insert(0, protect_off)
+
+        # Add some time to avoid locking
+        actions.append(self._add_pause())
+
+        return actions
+
+    @check_state_present
+    def _elb_target_group(self, module_name, result):
         return self._simple_name_rollback(module_name, result)
 
     @check_state_present
@@ -49,6 +86,74 @@ class CommunityAWSCleaner(CleanerBase):
         module_args = result._result.get('invocation').get('module_args')
         queue_type = module_args.get('queue_type')
         action[module_name]['queue_type'] = self._to_text(queue_type)
+
+        return action
+
+    @check_state_present
+    def _waf_condition(self, module_name, result):
+        action = self._simple_name_rollback(module_name, result)
+        module_args = result._result.get('invocation').get('module_args')
+        condition_type = module_args.get('type')
+        waf_regional = module_args.get('waf_regional')
+        action[module_name]['type'] = self._to_text(condition_type)
+        action[module_name]['waf_regional'] = waf_regional
+
+        return action
+
+    @check_state_present
+    def _waf_rule(self, module_name, result):
+        action = self._simple_name_rollback(module_name, result)
+        module_args = result._result.get('invocation').get('module_args')
+        waf_regional = module_args.get('waf_regional')
+        action[module_name]['waf_regional'] = waf_regional
+
+        return action
+
+    @check_state_present
+    def _waf_web_acl(self, module_name, result):
+        action = self._simple_name_rollback(module_name, result)
+        module_args = result._result.get('invocation').get('module_args')
+        waf_regional = module_args.get('waf_regional')
+        action[module_name]['waf_regional'] = waf_regional
+
+        return action
+
+    @check_state_present
+    def _wafv2_ip_set(self, module_name, result):
+        action = self._simple_name_rollback(module_name, result)
+        module_args = result._result.get('invocation').get('module_args')
+        scope = module_args.get('scope')
+        action[module_name]['scope'] = self._to_text(scope)
+
+        return action
+
+    @check_state_present
+    def _wafv2_resources(self, module_name, result):
+        action = self._simple_name_rollback(module_name, result)
+        module_args = result._result.get('invocation').get('module_args')
+        scope = module_args.get('scope')
+        arn = module_args.get('arn')
+        action[module_name]['scope'] = self._to_text(scope)
+        action[module_name]['arn'] = self._to_text(arn)
+
+        return action
+
+    @check_state_present
+    def _wafv2_rule_group(self, module_name, result):
+        # TODO: limited because may add or delete rule from a group
+        action = self._simple_name_rollback(module_name, result)
+        module_args = result._result.get('invocation').get('module_args')
+        scope = module_args.get('scope')
+        action[module_name]['scope'] = self._to_text(scope)
+
+        return action
+
+    @check_state_present
+    def _wafv2_web_acl(self, module_name, result):
+        action = self._simple_name_rollback(module_name, result)
+        module_args = result._result.get('invocation').get('module_args')
+        scope = module_args.get('scope')
+        action[module_name]['scope'] = self._to_text(scope)
 
         return action
 

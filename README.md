@@ -139,7 +139,7 @@ played to delete the resources previously created.
 | ```community.aws.directconnect_virtual_interface```       | ```No```  |
 | ```community.aws.dms_endpoint```                          | ```No```  |
 | ```community.aws.dms_replication_subnet_group```          | ```No```  |
-| ```community.aws.dynamodb_table```                        | ```No```  |
+| ```community.aws.dynamodb_table```                        | ```Yes``` |
 | ```community.aws.dynamodb_ttl```                          | ```No```  |
 | ```community.aws.ec2_ami_copy```                          | ```No```  |
 | ```community.aws.ec2_carrier_gateway```                   | ```No```  |
@@ -158,15 +158,15 @@ played to delete the resources previously created.
 | ```community.aws.eks_cluster```                           | ```No```  |
 | ```community.aws.eks_fargate_profile```                   | ```No```  |
 | ```community.aws.eks_nodegroup```                         | ```No```  |
-| ```community.aws.elasticache```                           | ```No```  |
+| ```community.aws.elasticache```                           | ```Yes``` |
 | ```community.aws.elasticache_parameter_group```           | ```No```  |
 | ```community.aws.elasticache_snapshot```                  | ```No```  |
 | ```community.aws.elasticache_subnet_group```              | ```No```  |
 | ```community.aws.elasticbeanstalk_app```                  | ```No```  |
 | ```community.aws.elb_instance```                          | ```No```  |
-| ```community.aws.elb_network_lb```                        | ```No```  |
+| ```community.aws.elb_network_lb```                        | ```Yes``` |
 | ```community.aws.elb_target```                            | ```No```  |
-| ```community.aws.elb_target_group```                      | ```No```  |
+| ```community.aws.elb_target_group```                      | ```Yes``` |
 | ```community.aws.glue_connection```                       | ```No```  |
 | ```community.aws.glue_crawler```                          | ```No```  |
 | ```community.aws.glue_job```                              | ```No```  |
@@ -207,13 +207,13 @@ played to delete the resources previously created.
 | ```community.aws.stepfunctions_state_machine```           | ```No```  |
 | ```community.aws.stepfunctions_state_machine_execution``` | ```No```  |
 | ```community.aws.sts_session_token```                     | ```No```  |
-| ```community.aws.waf_condition```                         | ```No```  |
-| ```community.aws.waf_rule```                              | ```No```  |
-| ```community.aws.waf_web_acl```                           | ```No```  |
-| ```community.aws.wafv2_ip_set```                          | ```No```  |
-| ```community.aws.wafv2_resources```                       | ```No```  |
-| ```community.aws.wafv2_rule_group```                      | ```No```  |
-| ```community.aws.wafv2_web_acl```                         | ```No```  |
+| ```community.aws.waf_condition```                         | ```Yes``` |
+| ```community.aws.waf_rule```                              | ```Yes``` |
+| ```community.aws.waf_web_acl```                           | ```Yes``` |
+| ```community.aws.wafv2_ip_set```                          | ```Yes``` |
+| ```community.aws.wafv2_resources```                       | ```Yes``` |
+| ```community.aws.wafv2_rule_group```                      | ```Yes``` |
+| ```community.aws.wafv2_web_acl```                         | ```Yes``` |
 
 ### For GCP:
 

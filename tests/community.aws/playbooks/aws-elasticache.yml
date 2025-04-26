@@ -1,0 +1,24 @@
+- name: Test Elasticache creation
+  hosts: localhost
+  connection: local
+  gather_facts: False
+  vars_files:
+    - vars.yml
+
+  vars:
+    elasticache_name: rollback-elasticache
+
+  tasks:
+    - name: Elasticache creation
+      community.aws.elasticache:
+        name: "{{ elasticache_name }}"
+        state: present
+        engine: memcached
+        num_nodes: 1
+        cache_port: 11211
+        zone: "{{ region }}a"
+
+
+
+
+

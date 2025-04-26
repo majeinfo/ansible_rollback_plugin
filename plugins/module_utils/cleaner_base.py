@@ -55,6 +55,10 @@ class CleanerBase(ABC):
             }
         }
 
+    # Generates warning
+    def _warning(selfself, *args):
+        display.warning(*args)
+
     # Simple rollback base on object name only
     def _simple_name_rollback(self, module_name, result):
         module_args = result._result.get('invocation').get('module_args')

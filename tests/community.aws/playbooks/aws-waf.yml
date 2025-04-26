@@ -1,0 +1,45 @@
+- name: Test Waf rule and ACL
+  hosts: localhost
+  connection: local
+  gather_facts: False
+  vars_files:
+    - vars.yml
+
+  vars:
+    waf_condition_name: rollback-condition
+    waf_rule_name: rollback-rule
+    waf_web_acl_name: rollback-web-acl
+
+  tasks:
+    - name: create IP address condition
+      community.aws.waf_condition:
+        name: "{{ waf_condition_name }}"
+        filters:
+          - ip_address: "10.0.0.0/8"
+          - ip_address: "192.168.0.0/24"
+        type: ip
+        waf_regional: true
+        region: "{{ region }}"
+
+    - name: create WAF rule
+      community.aws.waf_rule:
+        name: "{{ waf_rule_name }}"
+        region: "{{ region }}"
+        conditions:
+          - name: "{{ waf_condition_name }}"
+            type: ip
+            negated: false
+        waf_regional: true
+
+    - name: create web ACL
+      community.aws.waf_web_acl:
+        name: "{{ waf_web_acl_name }}"
+        region: "{{ region }}"
+        rules:
+          - name: "{{ waf_rule_name }}"
+            priority: 1
+            action: block
+        default_action: block
+        purge_rules: true
+        waf_regional: true
+        state: present

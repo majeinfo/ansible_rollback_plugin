@@ -1,0 +1,155 @@
+- name: Test Wafv2 rule and ACL
+  hosts: localhost
+  connection: local
+  gather_facts: False
+  vars_files:
+    - vars.yml
+
+  vars:
+    waf_ipset_name: rollback-ipset
+    waf_web_acl_name: rollback-web-acl
+    waf_metric_name: rollback-metric
+    waf_rule_group_name: rollback-rule-group
+    vpc_name: rollback-vpc
+    target_group_name: rollback-target-group
+    nlb_name: rollback-nlb
+
+  tasks:
+    - name: Create IP set
+      community.aws.wafv2_ip_set:
+        name: "{{ waf_ipset_name }}"
+        region: "{{ region }}"
+        state: present
+        description: rollback test
+        scope: REGIONAL
+        ip_address_version: IPV4
+        addresses:
+          - 8.8.8.8/32
+          - 8.8.4.4/32
+      register: ipset
+
+    - name: small pause
+      ansible.builtin.pause:
+        seconds: 5
+
+    - name: Create IP filtering web ACL
+      community.aws.wafv2_web_acl:
+        name: "{{ waf_web_acl_name }}"
+        region: "{{ region }}"
+        state: present
+        description: ACL that filters web traffic based on rate limits and whitelists some IPs
+        scope: REGIONAL
+        default_action: Allow
+        sampled_requests: true
+        cloudwatch_metrics: false
+        rules:
+          - name: "{{ waf_ipset_name }}"
+            priority: 0
+            action:
+              allow: {}
+            statement:
+              ip_set_reference_statement:
+                arn: "{{ ipset.arn }}"
+            visibility_config:
+              sampled_requests_enabled: false
+              cloud_watch_metrics_enabled: false
+              metric_name: "{{ waf_metric_name }}"
+
+    - name: Create a rule group
+      community.aws.wafv2_rule_group:
+        name: "{{ waf_rule_group_name }}"
+        state: present
+        description: Rollback test
+        scope: REGIONAL
+        region: "{{ region }}"
+        capacity: 500
+        rules:
+          - name: First
+            priority: 1
+            action:
+              allow: {}
+            visibility_config:
+              sampled_requests_enabled: false
+              cloud_watch_metrics_enabled: false
+              metric_name: my_metric1
+            statement:
+              ip_set_reference_statement:
+                arn: "{{ ipset.arn }}"
+        cloudwatch_metrics: false
+
+    - name: Create a VPC
+      amazon.aws.ec2_vpc_net:
+        name: "{{ vpc_name }}"
+        cidr_block: "10.10.0.0/16"
+        region: "{{ region }}"
+      register: vpc
+
+    - name: Create a VPC IGW
+      amazon.aws.ec2_vpc_igw:
+        vpc_id: "{{ vpc.vpc.id }}"
+        region: "{{ region }}"
+        tags:
+          Name: rollback-igw
+
+    - name: Create a Subnet in AZ a
+      amazon.aws.ec2_vpc_subnet:
+        cidr: "10.10.1.0/24"
+        region: "{{ region }}"
+        vpc_id: "{{ vpc.vpc.id }}"
+        az: "{{ region }}a"
+        tags:
+          Name: rollback_subnet_alb_a
+      register: subnet_a
+
+    - name: Create a Subnet in AZ b
+      amazon.aws.ec2_vpc_subnet:
+        cidr: "10.10.2.0/24"
+        region: "{{ region }}"
+        vpc_id: "{{ vpc.vpc.id }}"
+        az: "{{ region }}b"
+        tags:
+          Name: rollback_subnet_alb_b
+      register: subnet_b
+
+#    - name: Create a target group with a default health check
+#      community.aws.elb_target_group:
+#        name: "{{ target_group_name }}"
+#        region: "{{ region }}"
+#        target_type: ip
+#        protocol: http
+#        port: 80
+#        vpc_id: "{{ vpc.vpc.id }}"
+#        state: present
+
+    - name: Create a SecurityGroup
+      amazon.aws.ec2_security_group:
+        name: rollback_sg_alb
+        vpc_id: "{{ vpc.vpc.id }}"
+        description: test secgroup
+        region: "{{ region }}"
+        rules:
+          - proto: tcp
+            ports:
+              - 80
+              - 443
+            cidr_ip: 0.0.0.0/0
+
+    - name: Create an ALB
+      amazon.aws.elb_application_lb:
+        name: rollback-alb
+        security_groups:
+          - rollback_sg_alb
+        subnets:
+          - "{{ subnet_a.subnet.id }}"
+          - "{{ subnet_b.subnet.id }}"
+        state: present
+        region: "{{ region }}"
+      register: alb
+
+    - name: Add the Web ACL to an ALB
+      community.aws.wafv2_resources:
+        name: "{{ waf_web_acl_name }}"
+        region: "{{ region }}"
+        scope: REGIONAL
+        state: present
+        arn: "{{ alb.load_balancer_arn }}"

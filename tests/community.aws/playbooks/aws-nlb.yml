@@ -1,0 +1,73 @@
+- name: Test Wafv2 rule and ACL
+  hosts: localhost
+  connection: local
+  gather_facts: False
+  vars_files:
+    - vars.yml
+
+  vars:
+    vpc_name: rollback-vpc
+    target_group_name: rollback-target-group
+    nlb_name: rollback-nlb
+
+  tasks:
+    - name: Create a VPC
+      amazon.aws.ec2_vpc_net:
+        name: "{{ vpc_name }}"
+        cidr_block: "10.10.0.0/16"
+        region: "{{ region }}"
+      register: vpc
+
+    - name: Create a VPC IGW
+      amazon.aws.ec2_vpc_igw:
+        vpc_id: "{{ vpc.vpc.id }}"
+        region: "{{ region }}"
+        tags:
+          Name: rollback-igw
+
+    - name: Create a Subnet in AZ a
+      amazon.aws.ec2_vpc_subnet:
+        cidr: "10.10.1.0/24"
+        region: "{{ region }}"
+        vpc_id: "{{ vpc.vpc.id }}"
+        az: "{{ region }}a"
+        tags:
+          Name: rollback_subnet_alb_a
+      register: subnet_a
+
+    - name: Create a Subnet in AZ b
+      amazon.aws.ec2_vpc_subnet:
+        cidr: "10.10.2.0/24"
+        region: "{{ region }}"
+        vpc_id: "{{ vpc.vpc.id }}"
+        az: "{{ region }}b"
+        tags:
+          Name: rollback_subnet_alb_b
+      register: subnet_b
+
+    - name: Create a target group
+      community.aws.elb_target_group:
+        name: "{{ target_group_name }}"
+        region: "{{ region }}"
+        target_type: ip
+        protocol: tcp
+        port: 80
+        vpc_id: "{{ vpc.vpc.id }}"
+        state: present
+
+    - name: Create an NLB and attach a listener
+      community.aws.elb_network_lb:
+        name: "{{ nlb_name }}"
+        region: "{{ region }}"
+        subnets:
+          - "{{ subnet_a.subnet.id }}"
+          - "{{ subnet_b.subnet.id }}"
+        listeners:
+          - Protocol: TCP
+            Port: 80
+            DefaultActions:
+              - Type: forward
+                TargetGroupName: "{{ target_group_name }}"
+        state: present
+        # deletion_protection: true   # not supported
+      register: nlb
