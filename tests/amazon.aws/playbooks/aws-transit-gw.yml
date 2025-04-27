@@ -1,0 +1,50 @@
+- name: Test Transit Gateway
+  hosts: localhost
+  connection: local
+  gather_facts: False
+  vars_files:
+    - vars.yml
+
+  vars:
+    gw_name: rollback-transit-gw
+    vpc_name: rollback-vpc
+    subnet_name: rollback-subnet
+    attachment_name: rollback-attachment
+
+  tasks:
+    - name: Create a transit gateway using defaults
+      amazon.aws.ec2_transit_gateway:
+        state: present
+        region: "{{ region }}"
+        description: "{{ gw_name }}"
+      register: tgw
+
+    - name: Create a VPC
+      amazon.aws.ec2_vpc_net:
+        name: "{{ vpc_name }}"
+        cidr_block: "10.10.0.0/16"
+        region: "{{ region }}"
+      register: vpc
+
+    - name: Create a Subnet
+      amazon.aws.ec2_vpc_subnet:
+        cidr: "10.10.1.0/24"
+        region: "{{ region }}"
+        vpc_id: "{{ vpc.vpc.id }}"
+        tags:
+          Name: "{{ subnet_name }}"
+      register: subnet
+
+    - name: Create a Transit Gateway attachment
+      amazon.aws.ec2_transit_gateway_vpc_attachment:
+        state: present
+        transit_gateway: "{{ tgw.transit_gateway.transit_gateway_id }}"
+        name: "{{ attachment_name }}"
+        subnets:
+          - "{{ subnet.subnet.id }}"
+        ipv6_support: false
+        purge_subnets: false
+        dns_support: true
+        appliance_mode_support: false
+
+

@@ -61,8 +61,8 @@ played to delete the resources previously created.
 | ```amazon.aws.ec2_snapshot```                             | ```Yes``` |
 | ```amazon.aws.ec2_spot_instance```                        | ```Yes``` |
 | ```amazon.aws.ec2_tag```                                  | ```Yes``` |
-| ```amazon.aws.ec2_transit_gateway```                      | ```No```  |
-| ```amazon.aws.ec2_transit_gateway_vpc_attachment```       | ```No```  |
+| ```amazon.aws.ec2_transit_gateway```                      | ```Yes``` |
+| ```amazon.aws.ec2_transit_gateway_vpc_attachment```       | ```Yes``` |
 | ```amazon.aws.ec2_vol```                                  | ```Yes``` |
 | ```amazon.aws.ec2_vpc_dhcp_option```                      | ```Yes``` |
 | ```amazon.aws.ec2_vpc_egress_igw```                       | ```Yes``` |

@@ -279,13 +279,22 @@ class AmazonAWSCleaner(CleanerBase):
             }
         }
 
-    @not_supported
+    @check_state_present
     def _ec2_transit_gateway(self, module_name, result):
-        pass
+        module_args = result._result.get('invocation').get('module_args')
+        description = module_args.get('description')
+        self.callback._debug(f"Transit Gateway {description}")
 
-    @not_supported
+        return {
+            module_name: {
+                'state': 'absent',
+                'description': self._to_text(description),
+            }
+        }
+
+    @check_state_present
     def _ec2_transit_gateway_vpc_attachment(self, module_name, result):
-        pass
+        return self._simple_name_rollback(module_name, result)
 
     @check_state_present
     def _ec2_vol(self, module_name, result):
