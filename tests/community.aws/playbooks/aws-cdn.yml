@@ -1,0 +1,72 @@
+- name: Test CloudFront creation
+  hosts: localhost
+  connection: local
+  gather_facts: False
+  vars_files:
+    - vars.yml
+
+  vars:
+    cdn_name: rollback-cdn
+    origin_domain: www.mydomain.com
+    header_policy: rollback-policy
+
+  tasks:
+    - name: Create an origin access identity
+      community.aws.cloudfront_origin_access_identity:
+        state: present
+        caller_reference: rollback-reference
+        comment: rollback-comment
+
+    - name: Create a Cloudfront header policy using predefined header features
+      community.aws.cloudfront_response_headers_policy:
+        name: "{{ header_policy }}"
+        comment: Header policy for headers
+        cors_config:
+          access_control_allow_origins:
+            items:
+              - 'https://mydomain.com'
+          access_control_allow_headers:
+            items:
+              - 'X-Session-Id'
+          access_control_allow_methods:
+            items:
+              - GET
+          access_control_allow_credentials: true
+          access_control_expose_headers:
+            items:
+              - 'X-Session-Id'
+          access_control_max_age_sec: 1800
+          origin_override: true
+        security_headers_config:
+#          xss_protection:
+#            protection: true
+#            report_uri: 'https://my.report-uri.com/foo/bar'
+#            override: true
+#          frame_options:
+#            frame_option: 'SAMEORIGIN'
+#            override: true
+          referrer_policy:
+            referrer_policy: 'same-origin'
+            override: true
+#          content_security_policy:
+#            content_security_policy: "frame-ancestors 'none'; report-uri https://my.report-uri.com/r/d/csp/enforce;"
+#            override: true
+#          content_type_options:
+#            override: true
+#          strict_transport_security:
+#            include_subdomains: true
+
+    - name: Create a basic distribution with defaults and tags
+      community.aws.cloudfront_distribution:
+        state: present
+        default_origin_domain_name: "{{ origin_domain }}"
+        tags:
+          Name: "{{ cdn_name }}"
+          Priority: '1'
+        region: "{{ region }}"
+
+
+
+
+
+

@@ -31,6 +31,8 @@ played to delete the resources previously created.
 
 ## LIMITS AND BUGS:
 
+Originally developped for Ansible version 2.18+.
+
 - `amazon.aws.ec2_vpc_nat_gateway`: 
   when creating a NAT Gateway with a dynamically created EIP, the EIP is not deleted on rollback
 
@@ -118,10 +120,10 @@ played to delete the resources previously created.
 | ```community.aws.batch_job_definition```                  | ```No```               |
 | ```community.aws.batch_job_queue```                       | ```No```               |
 | ```community.aws.cloudformation_stack_set```              | ```No```               |
-| ```community.aws.cloudfront_distribution```               | ```No```               |
-| ```community.aws.cloudfront_invalidation```               | ```No```               |
-| ```community.aws.cloudfront_origin_access_identity```     | ```No```               |
-| ```community.aws.cloudfront_response_headers_policy```    | ```No```               |
+| ```community.aws.cloudfront_distribution```               | ```Yes```              |
+| ```community.aws.cloudfront_invalidation```               | ```n/a```              |
+| ```community.aws.cloudfront_origin_access_identity```     | ```Yes```              |
+| ```community.aws.cloudfront_response_headers_policy```    | ```Yes```              |
 | ```community.aws.codebuild_project```                     | ```No```               |
 | ```community.aws.codecommit_repository```                 | ```No```               |
 | ```community.aws.codepipeline```                          | ```No```               |
@@ -129,7 +131,7 @@ played to delete the resources previously created.
 | ```community.aws.config_aggregator```                     | ```No```               |
 | ```community.aws.config_delivery_channel```               | ```No```               |
 | ```community.aws.config_recorder```                       | ```No```               |
-| ```community.aws.config_rule```                           | ```Yes```            |
+| ```community.aws.config_rule```                           | ```Yes```              |
 | ```community.aws.data_pipeline```                         | ```No```               |
 | ```community.aws.directconnect_confirm_connection```      | ```No```               |
 | ```community.aws.directconnect_connection```              | ```No```               |

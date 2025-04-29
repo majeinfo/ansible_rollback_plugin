@@ -19,6 +19,36 @@ class CommunityAWSCleaner(CleanerBase):
         return self._simple_name_rollback(module_name, result)
 
     @check_state_present
+    def _cloudfront_distribution(self, module_name, result):
+        module_args = result._result.get('invocation').get('module_args')
+        tags = module_args.get('tags')
+        caller_ref = result._result.get('caller_reference')
+
+        return {
+            module_name: {
+                'state': 'absent',
+                'caller_reference': caller_ref,
+                'tags': tags,
+            }
+        }
+
+    @check_state_present
+    def _cloudfront_origin_access_identity(self, module_name, result):
+        module_args = result._result.get('invocation').get('module_args')
+        caller_ref = module_args.get('caller_reference')
+
+        return {
+            module_name: {
+                'state': 'absent',
+                'caller_reference': caller_ref,
+            }
+        }
+
+    @check_state_present
+    def _cloudfront_response_headers_policy(self, module_name, result):
+        return self._simple_name_rollback(module_name, result)
+
+    @check_state_present
     def _config_rule(self, module_name, result):
         action = self._simple_name_rollback(module_name, result)
         module_args = result._result.get('invocation').get('module_args')
@@ -96,7 +126,6 @@ class CommunityAWSCleaner(CleanerBase):
     def _sqs_queue(self, module_name, result):
         action = self._simple_name_rollback(module_name, result)
         module_args = result._result.get('invocation').get('module_args')
-        queue_type = module_args.get('queue_type')
         action[module_name]['queue_type'] = module_args.get('queue_type')
 
         return action
