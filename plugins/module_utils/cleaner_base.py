@@ -68,13 +68,9 @@ class CleanerBase(ABC):
         return {
             module_name: {
                 'state': 'absent',
-                'name': self._to_text(name),
+                'name': name,
             }
         }
-
-    # Convert AnsibleUnsafeText into a real str (needed for the YAML dumper)
-    def _to_text(self, value):
-        return super(type(value), value).__str__()
 
 
 # Decorator for unsupported module - returns a commented action

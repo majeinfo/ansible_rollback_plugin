@@ -1,7 +1,9 @@
 * map sensitive data to user defined variables ?
-* handle check mode ?
+* handle check mode ? to be tested
 * handling of Secrets ?
 * implements new AWS modules
 * implements GCP modules
 * implements Azure modules
 * some rollback actions use the "present" value and are so considered to be rollbacked !
+* some modules have older names => create aliases ?
+* replace add_pause by a retry...until loop ?

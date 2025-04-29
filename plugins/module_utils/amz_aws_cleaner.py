@@ -21,7 +21,7 @@ class AmazonAWSCleaner(CleanerBase):
         return {
             module_name: {
                 'state': 'absent',
-                'name': self._to_text(name),
+                'name': name,
             }
         }
 
@@ -38,7 +38,7 @@ class AmazonAWSCleaner(CleanerBase):
         return {
             module_name: {
                 'state': 'absent',
-                'backup_plan_name': self._to_text(backup_plan_name),
+                'backup_plan_name': backup_plan_name,
             }
         }
 
@@ -52,8 +52,8 @@ class AmazonAWSCleaner(CleanerBase):
         return {
             module_name: {
                 'state': 'absent',
-                'backup_plan_name': self._to_text(backup_plan_name),
-                'backup_selection_name': self._to_text(backup_selection_name),
+                'backup_plan_name': backup_plan_name,
+                'backup_selection_name': backup_selection_name,
             }
         }
 
@@ -70,7 +70,7 @@ class AmazonAWSCleaner(CleanerBase):
         return {
             module_name: {
                 'state': 'absent',
-                'backup_vault_name': self._to_text(backup_vault_name),
+                'backup_vault_name': backup_vault_name,
             }
         }
 
@@ -99,7 +99,7 @@ class AmazonAWSCleaner(CleanerBase):
         return {
             module_name: {
                 'state': 'absent',
-                'log_group_name': self._to_text(log_group_name),
+                'log_group_name': log_group_name,
             }
         }
 
@@ -111,7 +111,7 @@ class AmazonAWSCleaner(CleanerBase):
         return {
             module_name: {
                 'state': 'absent',
-                'image_id': self._to_text(image_id),
+                'image_id': image_id,
             }
         }
 
@@ -130,7 +130,7 @@ class AmazonAWSCleaner(CleanerBase):
         return {
             'amazon.aws.ec2_eip': {
                 'state': 'absent',
-                'public_ip': self._to_text(public_ip),
+                'public_ip': public_ip,
                 'in_vpc': in_vpc,
                 'release_on_disassociation': True,
             }
@@ -145,7 +145,7 @@ class AmazonAWSCleaner(CleanerBase):
         return {
             module_name: {
                 'state': 'absent',
-                'eni_id': self._to_text(eni_id),
+                'eni_id': eni_id,
             }
         }
   
@@ -159,7 +159,7 @@ class AmazonAWSCleaner(CleanerBase):
         return {
             module_name: {
                 'state': 'absent',
-                'name': self._to_text(key_name),
+                'name': key_name,
             }
         }
 
@@ -182,7 +182,7 @@ class AmazonAWSCleaner(CleanerBase):
         actions = [{
             module_name: {
                 'state': 'terminated',
-                'instance_ids': [self._to_text(id) for id in instance_ids],
+                'instance_ids': [id for id in instance_ids],
             }
         }]
         
@@ -190,7 +190,7 @@ class AmazonAWSCleaner(CleanerBase):
             protect_off = {
                 module_name: {
                     'termination_protection': False,
-                    'instance_ids': [self._to_text(id) for id in instance_ids],
+                    'instance_ids': [id for id in instance_ids],
                 }
             }
             actions.insert(0, protect_off)
@@ -209,7 +209,7 @@ class AmazonAWSCleaner(CleanerBase):
         return {
             module_name: {
                 'state': 'absent',
-                'template_name': self._to_text(template_name),
+                'template_name': template_name,
             }
         }
 
@@ -222,7 +222,7 @@ class AmazonAWSCleaner(CleanerBase):
         return {
             module_name: {
                 'state': 'absent',
-                'name': self._to_text(name),
+                'name': name,
             }
         }
 
@@ -234,7 +234,7 @@ class AmazonAWSCleaner(CleanerBase):
         return {
             module_name: {
                 'state': 'absent',
-                'group_id': self._to_text(group_id),
+                'group_id': group_id,
             }
         }
 
@@ -246,7 +246,7 @@ class AmazonAWSCleaner(CleanerBase):
         return {
             module_name: {
                 'state': 'absent',
-                'snapshot_id': self._to_text(snapshot_id),
+                'snapshot_id': snapshot_id,
             }
         }
 
@@ -259,7 +259,7 @@ class AmazonAWSCleaner(CleanerBase):
         return {
             module_name: {
                 'state': 'absent',
-                'spot_instance_request_ids': [self._to_text(spot_instance_request_id)],
+                'spot_instance_request_ids': [spot_instance_request_id],
             }
         }
 
@@ -270,12 +270,11 @@ class AmazonAWSCleaner(CleanerBase):
         tags = module_args.get('tags')
         self.callback._debug(f"Tags on resource {resource}")
 
-        tag_dict = {self._to_text(key): self._to_text(value) for key, value in tags.items()}
         return {
             module_name: {
                 'state': 'absent',
-                'resource': self._to_text(resource),
-                'tags': tag_dict,
+                'resource': resource,
+                'tags': tags,
             }
         }
 
@@ -288,7 +287,7 @@ class AmazonAWSCleaner(CleanerBase):
         return {
             module_name: {
                 'state': 'absent',
-                'description': self._to_text(description),
+                'description': description,
             }
         }
 
@@ -305,7 +304,7 @@ class AmazonAWSCleaner(CleanerBase):
         return {
             module_name: {
                 'state': 'absent',
-                'id': self._to_text(volume_id),
+                'id': volume_id,
             }
         }
 
@@ -317,7 +316,7 @@ class AmazonAWSCleaner(CleanerBase):
         return {
             module_name: {
                 'state': 'absent',
-                'dhcp_options_id': self._to_text(dhcp_options_id),
+                'dhcp_options_id': dhcp_options_id,
             }
         }
     
@@ -333,7 +332,7 @@ class AmazonAWSCleaner(CleanerBase):
         return {
             module_name: {
                 'state': 'absent',
-                'vpc_endpoint_id': self._to_text(vpc_endpoint_id),
+                'vpc_endpoint_id': vpc_endpoint_id,
             }
         }
     
@@ -346,8 +345,8 @@ class AmazonAWSCleaner(CleanerBase):
         return {
             module_name: {
                 'state': 'absent',
-                #'gateway_id': self._to_text(gateway_id),
-                'vpc_id': self._to_text(vpc_id),
+                #'gateway_id': gateway_id,
+                'vpc_id': vpc_id,
             }
         }
     
@@ -359,7 +358,7 @@ class AmazonAWSCleaner(CleanerBase):
         return {
             module_name: {
                 'state': 'absent',
-                'nacl_id': self._to_text(nacl_id),
+                'nacl_id': nacl_id,
             }
         }
 
@@ -394,7 +393,7 @@ class AmazonAWSCleaner(CleanerBase):
         actions.append({
             module_name: {
                 'state': 'absent',
-                'nat_gateway_id': self._to_text(nat_gateway_id),
+                'nat_gateway_id': nat_gateway_id,
             }
         })
 
@@ -412,7 +411,8 @@ class AmazonAWSCleaner(CleanerBase):
         return {
             module_name: {
                 'state': 'absent',
-                'vpc_id': self._to_text(vpc_id),
+                #'vpc_id': vpc_id,
+                'vpc_id': vpc_id,
             }
         }
 
@@ -424,7 +424,7 @@ class AmazonAWSCleaner(CleanerBase):
         return {
             module_name: {
                 'state': 'absent',
-                'peering_id': self._to_text(peering_id),
+                'peering_id': peering_id,
             }
         }
 
@@ -437,8 +437,8 @@ class AmazonAWSCleaner(CleanerBase):
         return {
             module_name: {
                 'state': 'absent',
-                #'vpc_id': self._to_text(vpc_id),
-                'route_table_id': self._to_text(route_table_id),
+                #'vpc_id': vpc_id,
+                'route_table_id': route_table_id,
                 'lookup': 'id',
             }
         }
@@ -446,7 +446,7 @@ class AmazonAWSCleaner(CleanerBase):
     @check_state_present
     def _ec2_vpc_subnet(self, module_name, result):
         subnet = result._result.get('subnet')
-        subnet_id = self._to_text(subnet.get('id'))
+        subnet_id = subnet.get('id')
         vpc_id = subnet.get('vpc_id')
         cidr_block = subnet.get('cidr_block')
         self.callback._debug(f"subnet {subnet_id}")
@@ -454,8 +454,8 @@ class AmazonAWSCleaner(CleanerBase):
         return {
             module_name: {
                 'state': 'absent',
-                'vpc_id': self._to_text(vpc_id),
-                'cidr': self._to_text(cidr_block),
+                'vpc_id': vpc_id,
+                'cidr': cidr_block,
             }
         }
 
@@ -475,7 +475,7 @@ class AmazonAWSCleaner(CleanerBase):
         return {
             module_name: {
                 'state': 'absent',
-                'name': self._to_text(load_balancer_name),
+                'name': load_balancer_name,
             }
         }
 
@@ -488,7 +488,7 @@ class AmazonAWSCleaner(CleanerBase):
         return {
             module_name: {
                 'state': 'absent',
-                'name': self._to_text(load_balancer_name),
+                'name': load_balancer_name,
             }
         }
 
@@ -502,8 +502,8 @@ class AmazonAWSCleaner(CleanerBase):
         return {
             module_name: {
                 'state': 'absent',
-                'id': self._to_text(access_key_id),
-                'user_name': self._to_text(user_name),
+                'id': access_key_id,
+                'user_name': user_name,
             }
         }
 
@@ -524,7 +524,7 @@ class AmazonAWSCleaner(CleanerBase):
         return {
             module_name: {
                 'state': 'absent',
-                'policy_name': self._to_text(policy_name),
+                'policy_name': policy_name,
             }
         }
 
@@ -545,9 +545,9 @@ class AmazonAWSCleaner(CleanerBase):
         return {
             module_name: {
                 'state': 'absent',
-                'iam_type': self._to_text(iam_type),
-                'iam_name': self._to_text(iam_name),
-                'policy_name': self._to_text(policy_name),
+                'iam_type': iam_type,
+                'iam_name': iam_name,
+                'policy_name': policy_name,
             }
         }
 
@@ -568,7 +568,7 @@ class AmazonAWSCleaner(CleanerBase):
         return {
             module_name: {
                 'state': 'absent',
-                'alias': self._to_text(alias),
+                'alias': alias,
             }
         }
 
@@ -586,8 +586,8 @@ class AmazonAWSCleaner(CleanerBase):
         return {
             module_name: {
                 'state': 'absent',
-                'name': self._to_text(name),
-                'function_name': self._to_text(function_name),
+                'name': name,
+                'function_name': function_name,
             }
         }
 
@@ -606,7 +606,7 @@ class AmazonAWSCleaner(CleanerBase):
         return {
             module_name: {
                 'state': 'absent',
-                'name': self._to_text(name),
+                'name': name,
                 'version': int(version),
             }
         }
@@ -636,7 +636,7 @@ class AmazonAWSCleaner(CleanerBase):
         actions = [{
             module_name: {
                 'state': 'absent',
-                'cluster_name': self._to_text(cluster_name),
+                'cluster_name': cluster_name,
                 'skip_final_snapshot': True,
             }
         }]
@@ -645,7 +645,7 @@ class AmazonAWSCleaner(CleanerBase):
             protect_off = {
                 module_name: {
                     'state': 'present',
-                    'cluster_name': self._to_text(cluster_name),
+                    'cluster_name': cluster_name,
                     'deletion_protection': False,
                 }
             }
@@ -669,7 +669,7 @@ class AmazonAWSCleaner(CleanerBase):
         return {
             module_name: {
                 'state': 'absent',
-                'db_cluster_snapshot_identifier': self._to_text(db_cluster_snapshot_identifier),
+                'db_cluster_snapshot_identifier': db_cluster_snapshot_identifier,
             }
         }
 
@@ -694,7 +694,7 @@ class AmazonAWSCleaner(CleanerBase):
         actions = [{
             module_name: {
                 'state': 'absent',
-                'instance_id': self._to_text(instance_id),
+                'instance_id': instance_id,
                 'skip_final_snapshot': True,
             }
         }]
@@ -703,7 +703,7 @@ class AmazonAWSCleaner(CleanerBase):
             protect_off = {
                 module_name: {
                     'state': 'present',
-                    'instance_id': self._to_text(instance_id),
+                    'instance_id': instance_id,
                     'deletion_protection': False,
                 }
             }
@@ -727,7 +727,7 @@ class AmazonAWSCleaner(CleanerBase):
         return {
             module_name: {
                 'state': 'absent',
-                'db_snapshot_identifier': self._to_text(db_snapshot_identifier),
+                'db_snapshot_identifier': db_snapshot_identifier,
             }
         }
 
@@ -740,7 +740,7 @@ class AmazonAWSCleaner(CleanerBase):
         return {
             module_name: {
                 'state': 'absent',
-                'option_group_name': self._to_text(option_group_name),
+                'option_group_name': option_group_name,
             }
         }
 
@@ -755,9 +755,9 @@ class AmazonAWSCleaner(CleanerBase):
         return {
             module_name: {
                 'state': 'absent',
-                'zone': self._to_text(zone),
-                'record': self._to_text(record),
-                'type': self._to_text(rtype),
+                'zone': zone,
+                'record': record,
+                'type': rtype,
             }
         }
 
@@ -777,7 +777,7 @@ class AmazonAWSCleaner(CleanerBase):
         return {
             module_name: {
                 'state': 'absent',
-                'name': self._to_text(name),
+                'name': name,
                 'force': True,
             }
         }
@@ -799,8 +799,8 @@ class AmazonAWSCleaner(CleanerBase):
             return {
                 module_name: {
                     'mode': 'delobj',
-                    'object': self._to_text(object_name),
-                    'bucket': self._to_text(bucket_name),
+                    'object': object_name,
+                    'bucket': bucket_name,
                 }
             }
 
@@ -811,8 +811,8 @@ class AmazonAWSCleaner(CleanerBase):
                 return {
                     module_name: {
                         'mode': 'delobj',
-                        'object': self._to_text(object_name),
-                        'bucket': self._to_text(bucket_name),
+                        'object': object_name,
+                        'bucket': bucket_name,
                     }
                 }
 
@@ -820,7 +820,7 @@ class AmazonAWSCleaner(CleanerBase):
             return {
                 'amazon.aws.s3_bucket': {
                     'state': 'absent',
-                    'bucket': self._to_text(bucket_name),
+                    'bucket': bucket_name,
                 }
             }
 
@@ -833,7 +833,7 @@ class AmazonAWSCleaner(CleanerBase):
         return {
             module_name: {
                 'state': 'absent',
-                'name': self._to_text(name),
+                'name': name,
             }
         }
 
@@ -866,7 +866,7 @@ class AmazonAWSCleaner(CleanerBase):
                 # TODO: handle secret ! do not write sensitive data
                 for key in ('access_key', 'secret_key', 'region', 'aws_config', 'profile', 'session_token'):
                     if value := module_args.get(key):
-                        final_action[action_module_name][key] = self._to_text(value)
+                        final_action[action_module_name][key] = value
 
             final_actions.append(final_action)
 

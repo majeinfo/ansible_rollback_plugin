@@ -1,0 +1,31 @@
+- name: Test Autoscaling group creation
+  hosts: localhost
+  connection: local
+  gather_facts: False
+  vars_files:
+    - vars.yml
+
+  vars:
+    as_launch_name: rollback-as-launch-conf
+
+  tasks:
+    - name: Create a launch configuration
+      community.aws.autoscaling_launch_config:
+        name: "{{ as_launch_name }}"
+        image_id: "{{ ami_id }}"
+        key_name: "{{ ec2_key_name }}"
+#        security_groups:
+#          - 'group'
+        instance_type: t3.micro
+        volumes:
+          - device_name: /dev/sda1
+            volume_size: 20
+            volume_type: gp3
+            iops: 3000
+            delete_on_termination: true
+            encrypted: false
+        region: "{{ region }}"
+
+
+
+

@@ -14,6 +14,18 @@ class CommunityAWSCleaner(CleanerBase):
         return "community.aws"
 
     @check_state_present
+    def _autoscaling_launch_config(self, module_name, result):
+        # TODO: not tested, only Launch Templates are supported in my account
+        return self._simple_name_rollback(module_name, result)
+
+    @check_state_present
+    def _config_rule(self, module_name, result):
+        action = self._simple_name_rollback(module_name, result)
+        module_args = result._result.get('invocation').get('module_args')
+        action[module_name]['source'] = module_args.get('source')
+        return action
+
+    @check_state_present
     def _dynamodb_table(self, module_name, result):
         return self._simple_name_rollback(module_name, result)
 
@@ -39,7 +51,7 @@ class CommunityAWSCleaner(CleanerBase):
         #     protect_off = {
         #         module_name: {
         #             'state': 'present',
-        #             'name': self._to_text(nlb_name),
+        #             'name': nlb_name,
         #             'deletion_protection': False,
         #         }
         #     }
@@ -64,7 +76,7 @@ class CommunityAWSCleaner(CleanerBase):
             return None
 
         prefix = module_args.get('prefix')
-        action[module_name]['prefix'] = self._to_text(prefix)
+        action[module_name]['prefix'] = prefix
         return action
 
     @check_state_present
@@ -85,7 +97,7 @@ class CommunityAWSCleaner(CleanerBase):
         action = self._simple_name_rollback(module_name, result)
         module_args = result._result.get('invocation').get('module_args')
         queue_type = module_args.get('queue_type')
-        action[module_name]['queue_type'] = self._to_text(queue_type)
+        action[module_name]['queue_type'] = module_args.get('queue_type')
 
         return action
 
@@ -93,10 +105,8 @@ class CommunityAWSCleaner(CleanerBase):
     def _waf_condition(self, module_name, result):
         action = self._simple_name_rollback(module_name, result)
         module_args = result._result.get('invocation').get('module_args')
-        condition_type = module_args.get('type')
-        waf_regional = module_args.get('waf_regional')
-        action[module_name]['type'] = self._to_text(condition_type)
-        action[module_name]['waf_regional'] = waf_regional
+        action[module_name]['type'] = module_args.get('type')
+        action[module_name]['waf_regional'] = module_args.get('waf_regional')
 
         return action
 
@@ -104,8 +114,7 @@ class CommunityAWSCleaner(CleanerBase):
     def _waf_rule(self, module_name, result):
         action = self._simple_name_rollback(module_name, result)
         module_args = result._result.get('invocation').get('module_args')
-        waf_regional = module_args.get('waf_regional')
-        action[module_name]['waf_regional'] = waf_regional
+        action[module_name]['waf_regional'] = module_args.get('waf_regional')
 
         return action
 
@@ -113,8 +122,7 @@ class CommunityAWSCleaner(CleanerBase):
     def _waf_web_acl(self, module_name, result):
         action = self._simple_name_rollback(module_name, result)
         module_args = result._result.get('invocation').get('module_args')
-        waf_regional = module_args.get('waf_regional')
-        action[module_name]['waf_regional'] = waf_regional
+        action[module_name]['waf_regional'] = module_args.get('waf_regional')
 
         return action
 
@@ -122,8 +130,7 @@ class CommunityAWSCleaner(CleanerBase):
     def _wafv2_ip_set(self, module_name, result):
         action = self._simple_name_rollback(module_name, result)
         module_args = result._result.get('invocation').get('module_args')
-        scope = module_args.get('scope')
-        action[module_name]['scope'] = self._to_text(scope)
+        action[module_name]['scope'] = module_args.get('scope')
 
         return action
 
@@ -131,10 +138,8 @@ class CommunityAWSCleaner(CleanerBase):
     def _wafv2_resources(self, module_name, result):
         action = self._simple_name_rollback(module_name, result)
         module_args = result._result.get('invocation').get('module_args')
-        scope = module_args.get('scope')
-        arn = module_args.get('arn')
-        action[module_name]['scope'] = self._to_text(scope)
-        action[module_name]['arn'] = self._to_text(arn)
+        action[module_name]['scope'] = module_args.get('scope')
+        action[module_name]['arn'] = module_args.get('arn')
 
         return action
 
@@ -143,8 +148,7 @@ class CommunityAWSCleaner(CleanerBase):
         # TODO: limited because may add or delete rule from a group
         action = self._simple_name_rollback(module_name, result)
         module_args = result._result.get('invocation').get('module_args')
-        scope = module_args.get('scope')
-        action[module_name]['scope'] = self._to_text(scope)
+        action[module_name]['scope'] = module_args.get('scope')
 
         return action
 
@@ -152,8 +156,7 @@ class CommunityAWSCleaner(CleanerBase):
     def _wafv2_web_acl(self, module_name, result):
         action = self._simple_name_rollback(module_name, result)
         module_args = result._result.get('invocation').get('module_args')
-        scope = module_args.get('scope')
-        action[module_name]['scope'] = self._to_text(scope)
+        action[module_name]['scope'] = module_args.get('scope')
 
         return action
 
@@ -186,7 +189,7 @@ class CommunityAWSCleaner(CleanerBase):
                 # TODO: handle secret ! do not write sensitive data
                 for key in ('access_key', 'secret_key', 'region', 'aws_config', 'profile', 'session_token'):
                     if value := module_args.get(key):
-                        final_action[action_module_name][key] = self._to_text(value)
+                        final_action[action_module_name][key] = value
 
             final_actions.append(final_action)
 

@@ -62,9 +62,9 @@ class GCPCleaner(CleanerBase):
         return {
             module_name: {
                 'state': 'absent',
-                'name': self._to_text(name),
-                'zone': self._to_text(zone),
-                'target': { 'selfLink': self._to_text(self_link) }, # why so ?
+                'name': name,
+                'zone': zone,
+                'target': { 'selfLink': self_link }, # why so ?
                 'autoscaling_policy': { 'max_num_replicas': 0 }    # autoscaling_policy, # why so ?
             }
         }
@@ -79,8 +79,8 @@ class GCPCleaner(CleanerBase):
         return {
             module_name: {
                 'state': 'absent',
-                'name': self._to_text(name),
-                'bucket_name': self._to_text(bucket_name),
+                'name': name,
+                'bucket_name': bucket_name,
             }
         }
 
@@ -98,8 +98,8 @@ class GCPCleaner(CleanerBase):
         return {
             module_name: {
                 'state': 'absent',
-                'name': self._to_text(name),
-                'zone': self._to_text(zone),
+                'name': name,
+                'zone': zone,
             }
         }
 
@@ -155,8 +155,8 @@ class GCPCleaner(CleanerBase):
         actions = [{
             module_name: {
                 'state': 'absent',
-                'name': self._to_text(name),
-                'zone': self._to_text(zone),
+                'name': name,
+                'zone': zone,
             }
         }]
 
@@ -164,8 +164,8 @@ class GCPCleaner(CleanerBase):
             protect_off = {
                 module_name: {
                     'state': 'present',
-                    'name': self._to_text(name),
-                    'zone': self._to_text(zone),
+                    'name': name,
+                    'zone': zone,
                     'deletion_protection': False,
                 }
             }
@@ -187,8 +187,8 @@ class GCPCleaner(CleanerBase):
         return {
             module_name: {
                 'state': 'absent',
-                'name': self._to_text(name),
-                'zone': self._to_text(zone),
+                'name': name,
+                'zone': zone,
             }
         }
 
@@ -205,10 +205,10 @@ class GCPCleaner(CleanerBase):
         return {
             module_name: {
                 'state': 'absent',
-                'name': self._to_text(name),
-                'zone': self._to_text(zone),
-                'base_instance_name': self._to_text(base_instance_name),
-                'instance_template': { 'selfLink': self._to_text(self_link) },
+                'name': name,
+                'zone': zone,
+                'base_instance_name': base_instance_name,
+                'instance_template': { 'selfLink': self_link },
             }
         }
 
@@ -243,10 +243,10 @@ class GCPCleaner(CleanerBase):
         return {
             module_name: {
                 'state': 'absent',
-                'name': self._to_text(name),
-                'zone': self._to_text(zone),
-                'node_template': { 'selfLink': self._to_text(self_link) },
-                'size': self._to_text(size),
+                'name': name,
+                'zone': zone,
+                'node_template': { 'selfLink': self_link },
+                'size': size,
             }
         }
 
@@ -266,9 +266,9 @@ class GCPCleaner(CleanerBase):
         return {
             module_name: {
                 'state': 'absent',
-                'name': self._to_text(name),
-                'region': self._to_text(region),
-                'target': self._to_text(target),
+                'name': name,
+                'region': region,
+                'target': target,
                 'autoscaling_policy': { 'max_num_replicas': 0 }    # autoscaling_policy, # why so ?
             }
         }
@@ -283,8 +283,8 @@ class GCPCleaner(CleanerBase):
         return {
             module_name: {
                 'state': 'absent',
-                'name': self._to_text(name),
-                'region': self._to_text(region),
+                'name': name,
+                'region': region,
             }
         }
 
@@ -299,9 +299,9 @@ class GCPCleaner(CleanerBase):
         return {
             module_name: {
                 'state': 'absent',
-                'name': self._to_text(name),
-                'region': self._to_text(region),
-                'replica_zones': [self._to_text(rz) for rz in replica_zones],
+                'name': name,
+                'region': region,
+                'replica_zones': replica_zones,
             }
         }
 
@@ -322,10 +322,10 @@ class GCPCleaner(CleanerBase):
         return {
             module_name: {
                 'state': 'absent',
-                'name': self._to_text(name),
-                'region': self._to_text(region),
-                'base_instance_name': self._to_text(base_instance_name),
-                'instance_template': { 'selfLink': self._to_text(self_link) },
+                'name': name,
+                'region': region,
+                'base_instance_name': base_instance_name,
+                'instance_template': { 'selfLink': self_link },
             }
         }
 
@@ -361,9 +361,9 @@ class GCPCleaner(CleanerBase):
         return {
             module_name: {
                 'state': 'absent',
-                'name': self._to_text(name),
-                'dest_range': self._to_text(dest_range),
-                'network': { 'selfLink': self._to_text(self_link) },
+                'name': name,
+                'dest_range': dest_range,
+                'network': { 'selfLink': self_link },
             }
         }
 
@@ -379,9 +379,9 @@ class GCPCleaner(CleanerBase):
         return {
             module_name: {
                 'state': 'absent',
-                'name': self._to_text(name),
-                'region': self._to_text(region),
-                'network': { 'selfLink': self._to_text(self_link) },
+                'name': name,
+                'region': region,
+                'network': { 'selfLink': self_link },
             }
         }
 
@@ -412,9 +412,9 @@ class GCPCleaner(CleanerBase):
         return {
             module_name: {
                 'state': 'absent',
-                'name': self._to_text(name),
-                'ip_cidr_range': self._to_text(ip_cidr_range),
-                'network': { 'selfLink': self._to_text(self_link) },
+                'name': name,
+                'ip_cidr_range': ip_cidr_range,
+                'network': { 'selfLink': self_link },
             }
         }
 
@@ -493,7 +493,7 @@ class GCPCleaner(CleanerBase):
         return {
             module_name: {
                 'state': 'absent',
-                'name': self._to_text(name),
+                'name': name,
             }
         }
 
@@ -509,7 +509,7 @@ class GCPCleaner(CleanerBase):
             module_name: {
                 'state': 'absent',
                 #'service_account': service_account,
-                'path': self._to_text(path),
+                'path': path,
             }
         }
 
@@ -642,7 +642,7 @@ class GCPCleaner(CleanerBase):
                 # TODO: handle secret ! do not write sensitive data
                 for key in ('project', 'auth_kind', 'service_account_file', 'region'):
                     if value := module_args.get(key):
-                        final_action[action_module_name][key] = self._to_text(value)
+                        final_action[action_module_name][key] = value
 
             final_actions.append(final_action)
 

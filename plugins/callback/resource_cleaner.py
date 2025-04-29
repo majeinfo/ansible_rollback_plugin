@@ -187,7 +187,13 @@ class CallbackModule(CallbackBase):
                 provider = self.providers[key]
                 try:
                     if (actions := provider.handle_action(action_name, result)) is not None:
-                        self._insert_actions(actions, result, action_name)
+                        # Convert types
+                        converted_actions = []
+                        for action in actions:
+                            converted_action = self._to_builtin_types(action)
+                            converted_actions.append(converted_action)
+
+                        self._insert_actions(converted_actions, result, action_name)
                 except Exception as e:
                     self._info(f"Action {action_name} has generated an Exception {e}")
             
@@ -304,8 +310,27 @@ class CallbackModule(CallbackBase):
             yaml.dump(playbook, f)
 
     # Convert AnsibleUnsafeText into a real str (needed for the YAML dumper)
-    def _to_text(self, value):
-        return super(type(value), value).__str__()
+    # def _to_text(self, value):
+    #     return super(type(value), value).__str__()
+
+    # Convert any Ansible struct into a standard Python struct
+    # to make the yaml.dump() possible
+    def _to_builtin_types(self, obj):
+        if type(obj) == str:
+            return obj
+        elif isinstance(obj, dict):
+            return {self._to_builtin_types(k): self._to_builtin_types(v) for k, v in obj.items()}
+        elif isinstance(obj, list):
+            return [self._to_builtin_types(i) for i in obj]
+        elif isinstance(obj, tuple):
+            return tuple(self._to_builtin_types(i) for i in obj)
+        elif isinstance(obj, set):
+            return {self._to_builtin_types(i) for i in obj}
+        elif isinstance(obj, (int, float, bool, type(None))):
+            return obj
+        else:
+            # Force fallback to string if unknown type (e.g., Ansible internal objects)
+            return super(type(obj), obj).__str__()
 
     # Display message if display mode and verbosity is sufficient
     def _info(self, msg):
