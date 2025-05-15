@@ -14,6 +14,25 @@ class CommunityAWSCleaner(CleanerBase):
         return "community.aws"
 
     @check_state_present
+    def _api_gateway(self, module_name, result):
+        # if lookup == tags: use tags or name, if no tags=> create a new api => api_id in result
+        # if lookup == id: use api_id
+        module_args = result._result.get('invocation').get('module_args')
+        lookup = module_args.get('lookup')
+        if lookup != 'tag':
+            return None
+
+        api_id = result._result.get('api_id')
+
+        return {
+            module_name: {
+                'state': 'absent',
+                'lookup': 'id',
+                'api_id': api_id,
+            }
+        }
+
+    @check_state_present
     def _autoscaling_launch_config(self, module_name, result):
         # TODO: not tested, only Launch Templates are supported in my account
         return self._simple_name_rollback(module_name, result)

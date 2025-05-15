@@ -1,0 +1,30 @@
+swagger: "2.0"
+info:
+  title: Simple API
+  description: A basic example of an AWS API Gateway-compatible Swagger file.
+  version: "1.0"
+
+host: "your-api-id.execute-api.us-east-1.amazonaws.com"
+basePath: "/dev"
+schemes:
+  - https
+
+paths:
+  /hello:
+    get:
+      summary: "Returns a greeting"
+      produces:
+        - application/json
+      responses:
+        200:
+          description: "Successful response"
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+      x-amazon-apigateway-integration:
+        #uri: arn:aws:apigateway:{{ region }}:lambda:path/2015-03-31/functions/arn:aws:lambda:us-east-1:123456789012:function:HelloWorldFunction/invocations
+        uri: arn:aws:apigateway:{{ region }}:lambda:path/2015-03-31/functions/arn:aws:lambda:{{ region }}:{{ account_id }}:function:{{ lambda_name }}/invocations
+        httpMethod: POST
+        type: aws_proxy

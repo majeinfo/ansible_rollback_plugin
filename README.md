@@ -94,7 +94,7 @@ Originally developped for Ansible version 2.18+.
 | ```amazon.aws.lambda_alias```                             | ```Yes```              |
 | ```amazon.aws.lambda_event```                             | ```No```               |
 | ```amazon.aws.lambda_layer```                             | ```Yes```              |
-| ```amazon.aws.lambda_policy```                            | ```No```               |
+| ```amazon.aws.lambda_policy```                            | ```Yes```              |
 | ```amazon.aws.rds_cluster```                              | ```Yes```              |
 | ```amazon.aws.rds_cluster_param_group```                  | ```Yes```              |
 | ```amazon.aws.rds_cluster_snapshot```                     | ```Yes```              |
@@ -108,7 +108,7 @@ Originally developped for Ansible version 2.18+.
 | ```amazon.aws.s3_bucket```                                | ```Yes```              |
 | ```amazon.aws.s3_object```                                | ```Yes```              |
 | ```community.aws.acm_certificate```                       | ```No```               |
-| ```community.aws.api_gateway```                           | ```No```               |
+| ```community.aws.api_gateway```                           | ```Yes```              |
 | ```community.aws.api_gateway_domain```                    | ```No```               |
 | ```community.aws.application_autoscaling_policy```        | ```No```               |
 | ```community.aws.autoscaling_complete_lifecycle_action``` | ```No```               |

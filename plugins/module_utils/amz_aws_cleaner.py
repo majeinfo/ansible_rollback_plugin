@@ -611,9 +611,24 @@ class AmazonAWSCleaner(CleanerBase):
             }
         }
 
-    @not_supported
+    @check_state_present
     def _lambda_policy(self, module_name, result):
-        pass
+        module_args = result._result.get('invocation').get('module_args')
+        function_name = module_args.get('function_name')
+        action = module_args.get('action')
+        principal = module_args.get('principal')
+        statement_id = module_args.get('statement_id')
+        self.callback._debug(f"Lambda policy for {function_name}")
+
+        return {
+            module_name: {
+                'state': 'absent',
+                'function_name': function_name,
+                'action': action,
+                'principal': principal,
+                'statement_id': statement_id,
+            }
+        }
 
     @check_state_present
     def _rds_cluster(self, module_name, result):

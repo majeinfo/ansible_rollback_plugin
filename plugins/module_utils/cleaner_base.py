@@ -55,6 +55,16 @@ class CleanerBase(ABC):
             }
         }
 
+    # Wrap the action into a until/retries loop
+    def _wrap_until_retries(self, action):
+        action |= {
+            'register': 'result',
+            'until': 'result is not failed',
+            'retries': 10, # TODO: use an environement variable with 'env' lookup plugin
+            'delay': 30,
+        }
+        return action
+
     # Generates warning
     def _warning(selfself, *args):
         display.warning(*args)

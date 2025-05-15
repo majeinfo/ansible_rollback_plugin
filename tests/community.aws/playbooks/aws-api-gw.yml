@@ -1,4 +1,4 @@
-- name: Test Lambda creation
+- name: Test API Gateway creation
   hosts: localhost
   connection: local
   gather_facts: False
@@ -12,6 +12,7 @@
     runtime: python3.12
     zip_file: files/hello.zip
     handler: hello.lambda_handler
+    api_gw_name: rollback-gw
 
   tasks:
     - name: Create an IAM Role
@@ -72,23 +73,37 @@
         runtime: '{{ runtime }}'
         role: '{{ role.iam_role.arn }}'
         handler: '{{ handler }}'
+      register: lambda_result
 
-    - name: Create a Lambda Alias
-      amazon.aws.lambda_alias:
-        function_name: "{{ lambda_name }}"
-        name: "{{ lambda_name }}-alias"
-        region: "{{ region }}"
-        description: Development version
+    - name: lambda returns
+      ansible.builtin.debug:
+        var: lambda_result
 
-    - name: Create a new layer for Lambda
-      amazon.aws.lambda_layer:
-        name: "{{ lambda_layer }}"
+    - name: Allow API Gateway to invoke Lambda
+      amazon.aws.lambda_policy:
+        state: present
+        function_name: '{{ lambda_name }}'
+        action: lambda:InvokeFunction
+        principal: apigateway.amazonaws.com
+        statement_id: apigw-access
+        source_arn: "arn:aws:execute-api:{{ region }}:{{ account_id }}:*/*/*/hello"
         region: "{{ region }}"
-        description: 'Rollback layer'
-        content:
-          zip_file: '{{ playbook_dir }}/../{{ zip_file }}'
-        compatible_runtimes:
-          - "{{ runtime }}"
-        license_info: MIT
-        compatible_architectures:
-          - x86_64
+
+    - name: Setup AWS API Gateway setup on AWS and deploy API definition
+      community.aws.api_gateway:
+        name: "{{ api_gw_name }}"
+        #swagger_file: "{{ playbook_dir }}/../files/swagger.yml"
+        swagger_text: "{{ lookup('template', playbook_dir + '/../files/swagger.yml') }}"
+        stage: production
+        cache_enabled: true
+        cache_size: '1.6'
+        tracing_enabled: true
+        endpoint_type: REGIONAL
+        region: "{{ region }}"
+        state: present
+      register: api_gw_result
+
+    - name: api gateway returns
+      debug:
+        var: api_gw_result
+
