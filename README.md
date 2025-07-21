@@ -142,7 +142,7 @@ Originally developped for Ansible version 2.18+.
 | ```community.aws.dms_replication_subnet_group```          | ```No```               |
 | ```community.aws.dynamodb_table```                        | ```Yes```              |
 | ```community.aws.dynamodb_ttl```                          | ```No```               |
-| ```community.aws.ec2_ami_copy```                          | ```No```               |
+| ```community.aws.ec2_ami_copy```                          | ```Yes```              |
 | ```community.aws.ec2_carrier_gateway```                   | ```No```               |
 | ```community.aws.ec2_customer_gateway```                  | ```No```               |
 | ```community.aws.ec2_snapshot_copy```                     | ```No```               |

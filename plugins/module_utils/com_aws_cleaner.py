@@ -78,6 +78,21 @@ class CommunityAWSCleaner(CleanerBase):
     def _dynamodb_table(self, module_name, result):
         return self._simple_name_rollback(module_name, result)
 
+    # no state "present": always creates a copy
+    def _ec2_ami_copy(self, module_name, result):
+        module_args = result._result.get('invocation').get('module_args')
+        region = module_args.get('region')  # dest region
+        image_id = result._result.get('image_id')
+
+        return {
+            'amazon.aws.ec2_ami': {
+                'state': 'absent',
+                'region': region,
+                'image_id': image_id,
+                'delete_snapshot': True,
+            }
+        }
+
     @check_state_present
     def _efs(self, module_name, result):
         return self._simple_name_rollback(module_name, result)

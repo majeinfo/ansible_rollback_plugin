@@ -1,0 +1,24 @@
+- name: Test EC1 AMI copy
+  hosts: localhost
+  connection: local
+  gather_facts: False
+  vars_files:
+    - vars.yml
+
+  tasks:
+    - name: EC2 AMI copy (in same region)
+      community.aws.ec2_ami_copy:
+        source_region: "{{ region }}"
+        source_image_id: "{{ ami_id }}"
+        region: "{{ region }}"
+      register: ami
+
+    - name: display copy id
+      debug:
+        var: ami
+
+
+
+
+
+
