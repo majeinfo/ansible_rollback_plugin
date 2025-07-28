@@ -137,6 +137,11 @@ class CallbackModule(CallbackBase):
         self.play = play
         self.actions = []
 
+        # disable the rollback feature in check mode
+        if hasattr(play, 'check_mode') and play.check_mode:
+            self._info("Rollback plugin running in CHECK MODE")
+            self.disabled = True
+
     # A task is started now
     def v2_playbook_on_task_start(self, task, is_conditional, handler=False):
         self._debug("v2_playbook_on_start_task")
@@ -164,7 +169,8 @@ class CallbackModule(CallbackBase):
         if result._task.loop:
             return
 
-        self._handle_action(result)
+        if not self.disabled: # Error or check mode
+            self._handle_action(result)
 
     # The runner succeeded to apply an item in a loop
     def v2_runner_item_on_ok(self, result):
