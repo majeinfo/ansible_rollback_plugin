@@ -149,7 +149,7 @@ Originally developped for Ansible version 2.18+.
 | ```community.aws.ec2_win_password```                      | ```No```               |
 | ```community.aws.ecs_attribute```                         | ```No```               |
 | ```community.aws.ecs_cluster```                           | ```Yes```              |
-| ```community.aws.ecs_ecr```                               | ```No```               |
+| ```community.aws.ecs_ecr```                               | ```Yes```              |
 | ```community.aws.ecs_service```                           | ```Yes```              |
 | ```community.aws.ecs_tag```                               | ```Yes```              |
 | ```community.aws.ecs_task```                              | ```No```               |
