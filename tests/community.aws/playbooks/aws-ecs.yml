@@ -1,0 +1,65 @@
+- name: Test ECS Management
+  hosts: localhost
+  connection: local
+  gather_facts: False
+  vars_files:
+    - vars.yml
+
+  vars:
+    ecr_name: rollback/ecr
+    cluster_name: rollback-cluster
+    service_name: rollback-service
+    taskdef_name: rollback-taskdef
+
+  tasks:
+    - name: Create an ECR
+      community.aws.ecs_ecr:
+        name: "{{ ecr_name }}"
+        state: present
+        region: "{{ region }}"
+
+    - name: Create an ECS Cluster
+      community.aws.ecs_cluster:
+        name: "{{ cluster_name }}"
+        state: present
+        region: "{{ region }}"
+      register: cluster
+
+    - name: Add Tags
+      community.aws.ecs_tag:
+        cluster_name: "{{ cluster_name }}"
+        resource_type: cluster
+        state: present
+        tags:
+          Name: test
+          Version: v1
+        region: "{{ region }}"
+
+    - name: Create task definition
+      community.aws.ecs_taskdefinition:
+        containers:
+          - name: simple-app
+            cpu: 10
+            essential: true
+            image: "httpd:2.4"
+            memory: 300
+            portMappings:
+              - containerPort: 80
+                hostPort: 80
+        family: "{{ taskdef_name }}"
+        state: present
+      register: task_output
+
+    - name: Debug Task Definition
+      ansible.builtin.debug:
+        var: task_output
+
+    - name: Create a Service
+      community.aws.ecs_service:
+        cluster: "{{ cluster_name }}"
+        name: "{{ service_name }}"
+        state: present
+        desired_count: 0
+        task_definition: "{{ taskdef_name }}"
+        region: "{{ region }}"
+

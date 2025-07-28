@@ -94,6 +94,54 @@ class CommunityAWSCleaner(CleanerBase):
         }
 
     @check_state_present
+    def _ecs_cluster(self, module_name, result):
+        return self._simple_name_rollback(module_name, result)
+
+    @check_state_present
+    def _ecs_ecr(self, module_name, result):
+        return self._simple_name_rollback(module_name, result)
+
+    @check_state_present
+    def _ecs_service(self, module_name, result):
+        module_args = result._result.get('invocation').get('module_args')
+        action = self._simple_name_rollback(module_name, result)
+        action[module_name]['cluster'] = module_args.get('cluster')
+        return action
+
+    @check_state_present
+    def _ecs_tag(self, module_name, result):
+        module_args = result._result.get('invocation').get('module_args')
+        cluster_name = module_args.get('cluster_name')
+        resource_type = module_args.get('resource_type')
+        tags = module_args.get('tags')
+
+        return {
+            module_name: {
+                'cluster_name': cluster_name,
+                'resource_type': resource_type,
+                'state': 'absent',
+                'tags': tags,
+            }
+        }
+
+    @check_state_present
+    def _ecs_taskdefinition(self, module_name, result):
+        module_args = result._result.get('invocation').get('module_args')
+        taskdef = result._result.get('taskdefinition')
+        containers_list = []
+        for container in module_args.get('containers'):
+            containers_list.append({'name': container.get('name')})
+
+        return {
+            module_name: {
+                'family': module_args.get('family'),
+                'revision': taskdef.get('revision'),
+                'containers': containers_list,
+                'state': 'absent',
+            }
+        }
+
+    @check_state_present
     def _efs(self, module_name, result):
         return self._simple_name_rollback(module_name, result)
 
