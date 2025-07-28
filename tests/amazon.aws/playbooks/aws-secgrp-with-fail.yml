@@ -1,0 +1,40 @@
+- name: Test SecurityGroup creation followed by a EC2 creation failure
+  hosts: localhost
+  connection: local
+  gather_facts: False
+  vars_files:
+    - vars.yml
+
+  tasks:
+    - name: Create a SecurityGroup
+      amazon.aws.ec2_security_group:
+        name: rollback_sg
+        description: test secgroup
+        region: "{{ region }}"
+        rules:
+          - proto: icmp
+            icmp_type: 3
+            icmp_code: 1
+            cidr_ip: 0.0.0.0/0
+
+    - name: Launch (failing) instance
+      amazon.aws.ec2_instance:
+         key_name: dummy_key
+         security_group: dummy_secgrp
+         instance_type: "t3.pico"
+         image_id: dummy_image_id
+         wait: true
+         region: "{{ region }}"
+         vpc_subnet_id: dummy_subnet
+         volumes:
+           - device_name: /dev/xvda
+             ebs:
+               volume_size: 10
+               volume_type: gp3
+               delete_on_termination: true
+         count: 1
+         state: running
+      register: ec2
+
+
+
