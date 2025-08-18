@@ -51,17 +51,17 @@ class CleanerBase(ABC):
         self.callback._debug('_add_pause')
         return {
             'ansible.builtin.pause': {
-                'seconds': 30,
+                'seconds': '{{ pause_seconds|int }}',
             }
         }
 
     # Wrap the action into a until/retries loop
     def _wrap_until_retries(self, action):
         action |= {
-            'register': 'result',
-            'until': 'result is not failed',
-            'retries': 10, # TODO: use an environement variable with 'env' lookup plugin
-            'delay': 30,
+            #'register': 'result',
+            #'until': 'result is not failed',
+            'retries': '{{ retry_count|int }}',
+            'delay': '{{ retry_delay|int }}',
         }
         return action
 

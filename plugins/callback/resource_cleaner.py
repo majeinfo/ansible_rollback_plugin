@@ -285,6 +285,11 @@ class CallbackModule(CallbackBase):
                 'connection': str(self.play.connection),
                 'gather_facts': self.play.gather_facts,
                 'ignore_errors': self.force_ignore_errors,
+                'vars': {
+                    'pause_seconds': 30,
+                    'retry_count': 10,
+                    'retry_delay': 30,
+                },
                 'tasks': commented_maps,
             })
         ])
