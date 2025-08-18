@@ -35,13 +35,22 @@ DOCUMENTATION = '''
             key: rollback_playbook_suffix
       hide_sensitive_data:
         required: False
-        default: False
-        description: if True, replaces sensitive data by stub variables
+        default: false
+        description: if True, replaces sensitive data by stub variables (not yet implemented)
         env:
           - name: HIDE_SENSITIVE_DATA
         ini:
           - section: resource_cleaner
             key: hide_sensitive_data
+      force_ignore_errors:
+        required: false
+        default: true
+        description: if True, adds the "ignore_errors" directive in the playbook preamble
+        env:
+          - name: FORCE_IGNORE_ERRORS
+        ini:
+          - section: resource_cleaner
+            key: force_ignore_errors
 '''
 
 import sys
@@ -70,6 +79,7 @@ from plugins.module_utils.gcp_cleaner import GCPCleaner
 PLAYBOOK_OUTPUT_PATH = '.'
 ROLLBACK_PLAYBOOK_SUFFIX = 'date'
 HIDE_SENSITIVE_DATA = False
+FORCE_IGNORE_ERRORS = True
 
 
 class CallbackModule(CallbackBase):
@@ -91,6 +101,7 @@ class CallbackModule(CallbackBase):
         self.play = None                # current play
         self.actions = []               # recorded actions for a Play
         self.hide_sensitive_data = HIDE_SENSITIVE_DATA
+        self.force_ignore_errors = FORCE_IGNORE_ERRORS
 
         # List of handled Cloud providers
         self.providers = {
@@ -109,6 +120,7 @@ class CallbackModule(CallbackBase):
         self.playbook_output_path = self.get_option('playbook_output_path')
         self.rollback_playbook_suffix = self.get_option('rollback_playbook_suffix')
         self.hide_sensitive_date = self.get_option('hide_sensitive_data')
+        self.force_ignore_errors = self.get_option('force_ignore_errors') in ("True", "true", "yes", "Yes")
 
         # Create the output_path if necessary
         if not os.path.exists(self.playbook_output_path):
@@ -272,6 +284,7 @@ class CallbackModule(CallbackBase):
                 'hosts': str(self.play.hosts[0]),
                 'connection': str(self.play.connection),
                 'gather_facts': self.play.gather_facts,
+                'ignore_errors': self.force_ignore_errors,
                 'tasks': commented_maps,
             })
         ])

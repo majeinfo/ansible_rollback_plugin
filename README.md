@@ -21,8 +21,11 @@ log_level = debug
 
 ; possible values for the rollback playbook suffixes are:
 ; date: (default) suffix with the current date (format .YYYY-MM-DD-hh-mm-ss)
-; rollback: sufix is .rollback
+; rollback: suffix is always ".rollback"
 rollback_playbook_suffix = date
+
+; add the "ignore_errors" directive in the generated playbook 
+force_ignore_errors = yes (default) | no
 ```
 
 Now, if you run a Playbook, a rollback Playbook will be created
