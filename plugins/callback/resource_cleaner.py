@@ -305,6 +305,15 @@ class CallbackModule(CallbackBase):
         current_comment = ''
 
         for action in self.actions:
+            # Always retries the action because action may succeed but their effect
+            # is not propagated in the whole cloud, so maybe the next action will fail.
+            # For example: deleteing a NLB in AWS is async and the action succeeds quicikly but
+            # trying to delete a subnet referenced by the deleted NLB will probably fail if called too early.
+            action |= {
+                'retries': '{{ retry_count|int }}',
+                'delay': '{{ retry_delay|int }}',
+            }
+
             if '_is_comment_' in action:
                 current_comment += f"\nname: {action['name']}\n{action['message']}\n\n"
             else:

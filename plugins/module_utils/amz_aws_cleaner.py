@@ -451,15 +451,13 @@ class AmazonAWSCleaner(CleanerBase):
         cidr_block = subnet.get('cidr_block')
         self.callback._debug(f"subnet {subnet_id}")
 
-        action = {
+        return {
             module_name: {
                 'state': 'absent',
                 'vpc_id': vpc_id,
                 'cidr': cidr_block,
             }
         }
-
-        return self._wrap_until_retries(action)
 
     @not_supported
     def _ec2_vpc_vgw(self, module_name, result):
